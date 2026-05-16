@@ -1,0 +1,385 @@
+import { Inject, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcryptjs';
+import type { UploadApiResponse } from 'cloudinary';
+import { randomBytes } from 'crypto';
+import { OAuth2Client } from 'google-auth-library';
+
+import { badRequestError, notFoundError, unauthorizedError } from '../../core/errors/domain-error';
+import { magicLinkTimeout, sessionTimeout } from '../../core/helpers/constant.helpers';
+import { EnvType } from '../../core/validators/env';
+import { CryptoService } from '../../crypto/crypto.service';
+import type { UserSchemaType } from '../../database/types';
+import { CloudinaryImageService } from '../media/services/cloudinary.service';
+import type { CreateUser, UserWithoutPassword } from './@types/auth.types';
+import { stripUserPassword } from './auth.mapper';
+import { AUTH_CLOUDINARY_SERVICE } from './auth.providers';
+import { AuthRepository, type AuthDbClient } from './auth.repository';
+import type { LoginDto, UpdateProfileDto } from './auth.schema';
+import { AuthSession } from './auth.session';
+import { MagicLinkEmailService } from './services/magic-link-email.service';
+
+interface UserInformation {
+	userId: number;
+	email: string;
+	userAgent: string;
+	ipAddress: string;
+	deviceName: string;
+	deviceType: string;
+	expirationTime?: number;
+}
+
+interface MagicLinkSessionInfo {
+	userAgent: string;
+	ipAddress: string;
+	deviceName: string;
+	deviceType: string;
+}
+
+export interface VerifiedGoogleProfile {
+	email: string;
+	name: string | null;
+	picture: string | null;
+	googleId: string;
+	emailVerified: boolean;
+}
+
+@Injectable()
+export class AuthService {
+	private readonly googleAuthClient = new OAuth2Client();
+
+	constructor(
+		private readonly authRepository: AuthRepository,
+		private readonly jwtService: JwtService,
+		private readonly authSession: AuthSession,
+		private readonly cryptoService: CryptoService,
+		private readonly magicLinkEmailService: MagicLinkEmailService,
+		@Inject(AUTH_CLOUDINARY_SERVICE)
+		private readonly cloudinaryImageService: CloudinaryImageService,
+		private readonly configService: ConfigService<EnvType, true>,
+	) {}
+
+	async generateAccessToken(userInfo: UserInformation): Promise<string> {
+		const sub = this.cryptoService.encrypt(userInfo.userId.toString());
+		const email = this.cryptoService.encrypt(userInfo.email);
+
+		const payload = { sub, email };
+		const token = this.jwtService.sign(payload);
+
+		return this.authSession.createSession({
+			userId: userInfo.userId,
+			expiresAt: userInfo.expirationTime
+				? new Date(userInfo.expirationTime)
+				: new Date(Date.now() + sessionTimeout),
+			userAgent: userInfo.userAgent,
+			ipAddress: userInfo.ipAddress,
+			deviceName: userInfo.deviceName,
+			deviceType: userInfo.deviceType,
+			token,
+		});
+	}
+
+	async requestMagicLink(email: string): Promise<void> {
+		const normalizedEmail = this.normalizeEmail(email);
+		const token = randomBytes(32).toString('hex');
+		const tokenHash = this.cryptoService.hash(token);
+		const expiresAt = new Date(Date.now() + magicLinkTimeout);
+
+		await this.authRepository.transaction(async tx => {
+			await this.authRepository.deleteVerificationsByIdentifier(normalizedEmail, tx);
+			await this.authRepository.createVerification(
+				{
+					identifier: normalizedEmail,
+					value: tokenHash,
+					expiresAt,
+				},
+				tx,
+			);
+		});
+
+		try {
+			await this.magicLinkEmailService.sendMagicLinkEmail({
+				email: normalizedEmail,
+				verificationUrl: this.buildMagicLinkVerificationUrl(normalizedEmail, token),
+				redirectUrl: this.buildMagicLinkRedirectUrl(),
+			});
+		} catch (error) {
+			await this.authRepository.deleteVerificationByIdentifierValue(normalizedEmail, tokenHash);
+
+			throw error;
+		}
+	}
+
+	async verifyMagicLink(
+		input: { email: string; token: string },
+		sessionInfo: MagicLinkSessionInfo,
+	): Promise<{ user: UserWithoutPassword; sessionToken: string }> {
+		const normalizedEmail = this.normalizeEmail(input.email);
+		const tokenHash = this.cryptoService.hash(input.token);
+
+		const user = await this.authRepository.transaction(async tx => {
+			const verification = await this.authRepository.findVerification(
+				normalizedEmail,
+				tokenHash,
+				tx,
+			);
+
+			if (!verification) {
+				throw unauthorizedError('Invalid or expired magic link');
+			}
+
+			if (verification.expiresAt < new Date()) {
+				await this.authRepository.deleteVerificationByIdentifierValue(
+					normalizedEmail,
+					tokenHash,
+					tx,
+				);
+
+				throw unauthorizedError('Magic link has expired');
+			}
+
+			const userRecord = await this.findOrProvisionMagicLinkUser(tx, normalizedEmail);
+
+			await this.authRepository.deleteVerificationsByIdentifier(normalizedEmail, tx);
+
+			return userRecord;
+		});
+
+		const sessionToken = await this.generateAccessToken({
+			userId: user.id,
+			email: user.email,
+			...sessionInfo,
+		});
+
+		return {
+			user,
+			sessionToken,
+		};
+	}
+
+	async findUserById(id: number): Promise<UserWithoutPassword> {
+		const user = await this.authRepository.findUserById(id);
+
+		if (!user) throw notFoundError('user_not_found', 'User not found');
+
+		return stripUserPassword(user);
+	}
+
+	async findUserByPublicId(publicId: string): Promise<UserWithoutPassword> {
+		const user = await this.authRepository.findUserByPublicId(publicId);
+
+		if (!user) throw notFoundError('user_not_found', 'User not found');
+
+		return stripUserPassword(user);
+	}
+
+	async findUserByEmail(email: string): Promise<UserWithoutPassword> {
+		const user = await this.authRepository.findUserByEmail(email);
+
+		if (!user) throw notFoundError('user_not_found', 'User not found');
+
+		return stripUserPassword(user);
+	}
+
+	async checkIfUserExists(email: string): Promise<boolean> {
+		const user = await this.authRepository.findUserByEmail(email);
+
+		return !!user;
+	}
+
+	async validateUser(data: LoginDto): Promise<Omit<UserSchemaType, 'password'>> {
+		const user = await this.authRepository.findUserByEmail(data.email);
+
+		if (!user) throw badRequestError('User with this email does not exist');
+
+		if (!user.emailVerified) throw unauthorizedError('Email not verified');
+
+		if (!user.password) throw unauthorizedError('User does not have a password set');
+
+		const isPasswordValid = await bcrypt.compare(data.password, user.password);
+
+		if (!isPasswordValid) throw unauthorizedError('Invalid credentials');
+
+		return stripUserPassword(user);
+	}
+
+	async createUser(data: CreateUser): Promise<UserWithoutPassword> {
+		let hashedPassword: string | undefined = undefined;
+		if (data.password) hashedPassword = await bcrypt.hash(data.password, 10);
+
+		let imageUrl: string | null = null;
+		let imageInformation: UploadApiResponse | null | undefined = null;
+
+		if (data.image) {
+			const uploadResult = await this.cloudinaryImageService.uploadFromGoogleUrl(data.image, {
+				folder: 'user_profiles',
+				transformation: {
+					quality: 'auto',
+					format: 'webp',
+					width: 500,
+					height: 500,
+					crop: 'fill',
+				},
+			});
+
+			imageUrl = String(uploadResult.data?.secure_url);
+			imageInformation = uploadResult.data;
+		}
+
+		const newUser = await this.authRepository.createUser({
+			...data,
+			image: imageUrl,
+			imageInformation,
+			password: hashedPassword,
+		});
+
+		return stripUserPassword(newUser);
+	}
+
+	async updateUser(
+		userId: number,
+		data: UpdateProfileDto & { imageInformation?: UploadApiResponse | null },
+	): Promise<UserWithoutPassword> {
+		const updatedUser = await this.authRepository.updateUser(userId, data);
+
+		return stripUserPassword(updatedUser);
+	}
+
+	async updateUserProfileImage(
+		userId: number,
+		file: Express.Multer.File,
+	): Promise<UserWithoutPassword> {
+		const result = await this.cloudinaryImageService.uploadWithFaceDetection(file.buffer, {
+			size: 200,
+			gravity: 'face:auto',
+		});
+
+		if (!result.success || !result.data) {
+			throw badRequestError('Failed to upload image');
+		}
+
+		const currentUser = await this.findUserById(userId);
+		if (currentUser.imageInformation && currentUser.imageInformation.public_id) {
+			await this.cloudinaryImageService.deleteMedia(currentUser.imageInformation.public_id);
+		}
+
+		return this.updateUser(userId, {
+			image: result.data.secure_url,
+			imageInformation: result.data,
+		});
+	}
+
+	async verifyGoogleCredential(credential: string): Promise<VerifiedGoogleProfile> {
+		try {
+			const ticket = await this.googleAuthClient.verifyIdToken({
+				idToken: credential,
+				audience: this.configService.get('GOOGLE_CLIENT_ID'),
+			});
+
+			const payload = ticket.getPayload();
+
+			if (!payload?.sub || !payload.email) {
+				throw unauthorizedError('Invalid Google credential');
+			}
+
+			if (payload.email_verified !== true) {
+				throw unauthorizedError('Google account email is not verified');
+			}
+
+			return {
+				email: payload.email,
+				name: payload.name ?? null,
+				picture: payload.picture ?? null,
+				googleId: payload.sub,
+				emailVerified: payload.email_verified,
+			};
+		} catch (error) {
+			if (error instanceof Error && 'status' in error) {
+				throw error;
+			}
+
+			throw unauthorizedError('Google authentication failed. Please try again.');
+		}
+	}
+
+	async findOrCreateGoogleUser(profile: VerifiedGoogleProfile): Promise<UserWithoutPassword> {
+		const existingAccount = await this.authRepository.findAccountByProvider(
+			'google',
+			profile.googleId,
+		);
+
+		if (existingAccount) {
+			return this.findUserById(existingAccount.userId);
+		}
+
+		const existingUser = await this.authRepository.findUserByEmail(profile.email);
+
+		if (existingUser) {
+			await this.authRepository.createAccountLink({
+				accountId: profile.googleId,
+				providerId: 'google',
+				userId: existingUser.id,
+			});
+
+			return stripUserPassword(existingUser);
+		}
+
+		const newUser = await this.createUser({
+			name: profile.name,
+			email: profile.email,
+			password: null,
+			image: profile.picture,
+			imageInformation: null,
+			emailVerified: profile.emailVerified,
+			phone: null,
+			role: 'USER',
+		});
+
+		await this.authRepository.createAccountLink({
+			accountId: profile.googleId,
+			providerId: 'google',
+			userId: newUser.id,
+		});
+
+		return newUser;
+	}
+
+	private normalizeEmail(email: string): string {
+		return email.trim().toLowerCase();
+	}
+
+	private buildMagicLinkVerificationUrl(email: string, token: string): string {
+		const appUrl = this.configService.get('APP_URL', { infer: true });
+		const url = new URL('/auth/magic-link/verify', appUrl);
+		url.searchParams.set('email', email);
+		url.searchParams.set('token', token);
+		return url.toString();
+	}
+
+	private buildMagicLinkRedirectUrl(): string {
+		const appUrl = this.configService.get('APP_URL', { infer: true });
+		return new URL('/auth/magic-link/success', appUrl).toString();
+	}
+
+	private async findOrProvisionMagicLinkUser(
+		db: AuthDbClient,
+		email: string,
+	): Promise<UserWithoutPassword> {
+		const existingUser = await this.authRepository.findUserByEmail(email, db);
+
+		if (existingUser) {
+			const user = existingUser.emailVerified
+				? existingUser
+				: await this.authRepository.markUserEmailVerified(existingUser.id, db);
+
+			if (!user) throw notFoundError('user_not_found', 'User not found');
+
+			return stripUserPassword(user);
+		}
+
+		const newUser = await this.authRepository.createMagicLinkUser(email, db);
+
+		return stripUserPassword(newUser);
+	}
+}

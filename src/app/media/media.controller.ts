@@ -1,0 +1,85 @@
+import {
+	Body,
+	Controller,
+	Delete,
+	Get,
+	HttpCode,
+	HttpStatus,
+	Param,
+	ParseUUIDPipe,
+	Post,
+	Put,
+	UploadedFile,
+	UseGuards,
+	UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
+
+import { CurrentUser } from '../../core/decorators/current-user.decorator';
+import { ApiResponse, createApiResponse } from '../../core/interceptors/api-response.interceptor';
+import { ZodValidationPipe } from '../../core/pipes/zod-validation.pipe';
+import type { UserWithoutPassword } from '../auth/@types/auth.types';
+import { JwtAuthGuard } from '../auth/auth.guard';
+import { MediaResponseType } from './@types/media.types';
+import { FILE_SIZE_LIMIT, singleFileSchema, ZodFileValidationPipe } from './media.pipe';
+import { type MediaDto, mediaSchema } from './media.schema';
+import { MediaService } from './media.service';
+
+@Controller('media')
+export class MediaController {
+	constructor(private readonly mediaService: MediaService) {}
+
+	@UseGuards(JwtAuthGuard)
+	@Post('/')
+	@HttpCode(HttpStatus.OK)
+	@UseInterceptors(
+		FileInterceptor('file', {
+			storage: memoryStorage(),
+			// Multer-level hard limit (fast fail before Zod, still validate in Zod too)
+			limits: { fileSize: FILE_SIZE_LIMIT },
+		}),
+	)
+	async uploadMedia(
+		@UploadedFile(new ZodFileValidationPipe(singleFileSchema))
+		file: Express.Multer.File,
+		@CurrentUser() user: UserWithoutPassword,
+	): Promise<ApiResponse<boolean>> {
+		const response = await this.mediaService.uploadFile(user.id, file);
+
+		return createApiResponse(HttpStatus.OK, 'Media uploaded successfully', response);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Get('/')
+	async getAllMedia(
+		@CurrentUser() user: UserWithoutPassword,
+	): Promise<ApiResponse<MediaResponseType[]>> {
+		const mediaItems = await this.mediaService.getAllMedia(user.id);
+
+		return createApiResponse(HttpStatus.OK, 'Media fetched successfully', mediaItems);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Put('/:id')
+	async updateMedia(
+		@CurrentUser() user: UserWithoutPassword,
+		@Body(new ZodValidationPipe(mediaSchema)) body: MediaDto,
+		@Param('id', ParseUUIDPipe) id: string,
+	): Promise<ApiResponse<boolean>> {
+		const response = await this.mediaService.updateMediaData(user.id, id, body);
+
+		return createApiResponse(HttpStatus.OK, 'Media updated successfully', response);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Delete('/:id')
+	async deleteMedia(
+		@CurrentUser() user: UserWithoutPassword,
+		@Param('id', ParseUUIDPipe) id: string,
+	): Promise<ApiResponse<boolean>> {
+		await this.mediaService.deleteMedia(user.id, id);
+
+		return createApiResponse(HttpStatus.OK, 'Media deleted successfully', true);
+	}
+}
