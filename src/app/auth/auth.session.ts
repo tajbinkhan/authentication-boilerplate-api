@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { Request } from 'express';
 import { UAParser } from 'ua-parser-js';
 
-import { unauthorizedError } from '../../core/errors/domain-error';
+import { notFoundError, unauthorizedError } from '../../core/errors/domain-error';
 import { sessionRenewalThreshold, sessionTimeout } from '../../core/helpers/constant.helpers';
 import type { SessionSchemaType } from '../../database/types';
 import type { SessionDataType } from './@types/auth.types';
@@ -86,6 +86,24 @@ export class AuthSession {
 		await this.authSessionRepository.revokeSession(userId, sessionKeyOrId);
 
 		return true;
+	}
+
+	async revokeUserSession(userId: number, sessionPublicId: string): Promise<SessionSchemaType> {
+		const session = await this.authSessionRepository.revokeSessionByPublicIdForUser(
+			userId,
+			sessionPublicId,
+		);
+
+		if (!session) throw notFoundError('session_not_found', 'Session not found');
+
+		return session;
+	}
+
+	revokeOtherUserSessions(userId: number, currentSessionToken: string): Promise<number> {
+		return this.authSessionRepository.revokeOtherActiveUserSessions(
+			userId,
+			currentSessionToken,
+		);
 	}
 
 	revokeAllUserSessions(userId: number): Promise<number> {

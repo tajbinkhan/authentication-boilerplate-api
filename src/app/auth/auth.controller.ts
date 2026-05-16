@@ -4,6 +4,8 @@ import {
 	Get,
 	HttpCode,
 	HttpStatus,
+	Param,
+	ParseUUIDPipe,
 	Post,
 	Put,
 	Query,
@@ -28,9 +30,13 @@ import {
 import { ZodValidationPipe } from '../../core/pipes/zod-validation.pipe';
 import { EnvType } from '../../core/validators/env';
 import { FILE_SIZE_LIMIT, singleFileSchema, ZodFileValidationPipe } from '../media/media.pipe';
-import type { UserWithoutPassword, UserWithoutPasswordResponse } from './@types/auth.types';
+import type {
+	SessionResponse,
+	UserWithoutPassword,
+	UserWithoutPasswordResponse,
+} from './@types/auth.types';
 import { JwtAuthGuard } from './auth.guard';
-import { mapUserResponse } from './auth.mapper';
+import { mapSessionResponse, mapUserResponse } from './auth.mapper';
 import {
 	type GoogleLoginDto,
 	googleLoginSchema,
@@ -140,6 +146,68 @@ export class AuthController {
 			HttpStatus.OK,
 			'User profile fetched successfully',
 			mapUserResponse(user),
+		);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Get('sessions')
+	async getSessions(
+		@CurrentUser() user: UserWithoutPassword,
+		@Request() request: ExpressRequest,
+	): Promise<ApiResponse<SessionResponse[]>> {
+		const sessionToken = request.cookies['access-token'] as string | undefined;
+		const sessions = await this.authSession.listOfUserSessions(user.id);
+
+		return createApiResponse(
+			HttpStatus.OK,
+			'Sessions fetched successfully',
+			sessions.map(session => mapSessionResponse(session, sessionToken)),
+		);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Post('sessions/revoke-others')
+	@HttpCode(HttpStatus.OK)
+	async revokeOtherSessions(
+		@CurrentUser() user: UserWithoutPassword,
+		@Request() request: ExpressRequest,
+	): Promise<ApiResponse<{ revokedCount: number }>> {
+		const sessionToken = request.cookies['access-token'] as string | undefined;
+
+		if (!sessionToken) throw badRequestError('No active session found');
+
+		const revokedCount = await this.authSession.revokeOtherUserSessions(user.id, sessionToken);
+
+		return createApiResponse(HttpStatus.OK, 'Other sessions revoked successfully', {
+			revokedCount,
+		});
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Post('sessions/:id/revoke')
+	@HttpCode(HttpStatus.OK)
+	async revokeSession(
+		@CurrentUser() user: UserWithoutPassword,
+		@Param('id', ParseUUIDPipe) id: string,
+		@Request() request: ExpressRequest,
+	): Promise<ApiResponse<SessionResponse>> {
+		const sessionToken = request.cookies['access-token'] as string | undefined;
+
+		if (!sessionToken) throw badRequestError('No active session found');
+
+		const revokedSession = await this.authSession.revokeUserSession(user.id, id);
+
+		if (revokedSession.token === sessionToken) {
+			request.res?.clearCookie(
+				'access-token',
+				AppHelpers.accessTokenClearCookieConfig(this.configService),
+			);
+		}
+
+		return createApiResponse(
+			HttpStatus.OK,
+			'Session revoked successfully',
+			mapSessionResponse(revokedSession, sessionToken),
 		);
 	}
 

@@ -6,7 +6,7 @@ not from `routes.json`.
 
 ## Modules
 
-- [Auth](auth.md): magic links, Google login, logout, and profile routes.
+- [Auth](auth.md): magic links, Google login, logout, session management, and profile routes.
 - [Media](media.md): media upload, listing, update, and deletion routes.
 - [CSRF](csrf.md): CSRF token issuing and unsafe-method protection.
 

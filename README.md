@@ -6,7 +6,7 @@ and integrations.
 
 ## Overview
 
-- Auth: magic-link sign-in, Google login, session logout, and profile endpoints (`/auth`).
+- Auth: magic-link sign-in, Google login, session management, and profile endpoints (`/auth`).
 - Media: upload, list, update, and delete media assets (`/media`).
 - CSRF: token issuing and unsafe-method protection (`/csrf`).
 - Security: JWT guards, CSRF guard, and standardized error responses.

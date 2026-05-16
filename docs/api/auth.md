@@ -394,6 +394,201 @@ None.
 }
 ```
 
+## List Sessions
+
+`GET /auth/sessions`
+
+### Purpose
+
+Returns the authenticated user's session and device history.
+
+### How It Works
+
+The JWT guard validates the current `access-token` cookie. The API then lists all session records
+owned by the current user, orders them newest first, computes each session status, and marks the
+current session by comparing each stored session token to the current cookie value.
+
+### Authentication
+
+Required. Send a valid `access-token` cookie.
+
+### CSRF
+
+Not required because this is a safe `GET` route.
+
+### Required Parameters
+
+None.
+
+### Optional Parameters
+
+None.
+
+### Validation Rules
+
+- The session must exist, be unrevoked, and be unexpired.
+- Only sessions owned by the current user are returned.
+- Session tokens, numeric database IDs, and internal user IDs are never returned.
+
+### Successful Response
+
+```json
+{
+	"statusCode": 200,
+	"message": "Sessions fetched successfully",
+	"data": [
+		{
+			"id": "7f44294a-3774-4604-9109-f32bc3a6e2c1",
+			"deviceName": "Windows 11 - Chrome",
+			"deviceType": "desktop",
+			"ipAddress": "203.0.113.10",
+			"userAgent": "Chrome - 125.0.0.0",
+			"status": "active",
+			"isCurrent": true,
+			"isRevoked": false,
+			"twoFactorVerified": false,
+			"createdAt": "2026-05-16T00:00:00.000Z",
+			"updatedAt": "2026-05-16T00:00:00.000Z",
+			"expiresAt": "2026-05-23T00:00:00.000Z"
+		}
+	],
+	"timestamp": "2026-05-16T00:00:00.000Z",
+	"path": "/auth/sessions"
+}
+```
+
+### Error Responses
+
+- `401 unauthorized` when the current session token is missing, invalid, revoked, expired, or
+  blocked by pending 2FA.
+
+## Revoke Session
+
+`POST /auth/sessions/:id/revoke`
+
+### Purpose
+
+Revokes one session owned by the authenticated user.
+
+### How It Works
+
+The route parameter is parsed as a UUID. The repository updates only a session matching both the
+public session ID and the current user. The row is retained and marked revoked. If the target is the
+current session, the `access-token` cookie is cleared.
+
+### Authentication
+
+Required. Send a valid `access-token` cookie.
+
+### CSRF
+
+Required. Send `x-csrf-token` and the matching `csrf-token` cookie.
+
+### Required Parameters
+
+Path parameter:
+
+- `id`: session public UUID.
+
+### Optional Parameters
+
+None.
+
+### Validation Rules
+
+- `id` must be a valid UUID.
+- The target session must belong to the current user.
+- Session tokens, numeric database IDs, and internal user IDs are never returned.
+
+### Successful Response
+
+```json
+{
+	"statusCode": 200,
+	"message": "Session revoked successfully",
+	"data": {
+		"id": "7f44294a-3774-4604-9109-f32bc3a6e2c1",
+		"deviceName": "Windows 11 - Chrome",
+		"deviceType": "desktop",
+		"ipAddress": "203.0.113.10",
+		"userAgent": "Chrome - 125.0.0.0",
+		"status": "revoked",
+		"isCurrent": false,
+		"isRevoked": true,
+		"twoFactorVerified": false,
+		"createdAt": "2026-05-16T00:00:00.000Z",
+		"updatedAt": "2026-05-16T00:00:00.000Z",
+		"expiresAt": "2026-05-23T00:00:00.000Z"
+	},
+	"timestamp": "2026-05-16T00:00:00.000Z",
+	"path": "/auth/sessions/7f44294a-3774-4604-9109-f32bc3a6e2c1/revoke"
+}
+```
+
+### Error Responses
+
+- `403 csrf_invalid` when the CSRF token is missing or invalid.
+- `401 unauthorized` when the current session token is missing, invalid, revoked, expired, or
+  blocked by pending 2FA.
+- `400 bad_request` when no active session can be found on the request or `id` is not a valid UUID.
+- `404 session_not_found` when the target session does not exist for the current user.
+
+## Revoke Other Sessions
+
+`POST /auth/sessions/revoke-others`
+
+### Purpose
+
+Revokes all other active sessions for the authenticated user while keeping the current session valid.
+
+### How It Works
+
+The JWT guard validates the current session. The repository marks every unrevoked, unexpired session
+for the current user as revoked, excluding the current cookie token.
+
+### Authentication
+
+Required. Send a valid `access-token` cookie.
+
+### CSRF
+
+Required. Send `x-csrf-token` and the matching `csrf-token` cookie.
+
+### Required Parameters
+
+None.
+
+### Optional Parameters
+
+None.
+
+### Validation Rules
+
+- The current session must exist, be unrevoked, and be unexpired.
+- The current session is excluded from revocation.
+- Already revoked or expired sessions are left unchanged.
+
+### Successful Response
+
+```json
+{
+	"statusCode": 200,
+	"message": "Other sessions revoked successfully",
+	"data": {
+		"revokedCount": 2
+	},
+	"timestamp": "2026-05-16T00:00:00.000Z",
+	"path": "/auth/sessions/revoke-others"
+}
+```
+
+### Error Responses
+
+- `403 csrf_invalid` when the CSRF token is missing or invalid.
+- `401 unauthorized` when the current session token is missing, invalid, revoked, expired, or
+  blocked by pending 2FA.
+- `400 bad_request` when no active session can be found on the request.
+
 ## Get Current Profile
 
 `GET /auth/me`

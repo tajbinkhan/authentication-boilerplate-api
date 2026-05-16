@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, gt, ne } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 import { DATABASE_CONNECTION } from '../../database/connection';
@@ -36,6 +36,15 @@ export class AuthSessionRepository {
 		});
 	}
 
+	findSessionByPublicIdForUser(
+		userId: number,
+		publicId: string,
+	): Promise<SessionSchemaType | undefined> {
+		return this.db.query.sessions.findFirst({
+			where: and(eq(schema.sessions.publicId, publicId), eq(schema.sessions.userId, userId)),
+		});
+	}
+
 	async extendSession(sessionId: number, expiresAt: Date): Promise<SessionSchemaType | undefined> {
 		return this.db
 			.update(schema.sessions)
@@ -52,6 +61,39 @@ export class AuthSessionRepository {
 			.where(
 				and(this.getSessionIdentityCondition(sessionKeyOrId), eq(schema.sessions.userId, userId)),
 			);
+	}
+
+	async revokeSessionByPublicIdForUser(
+		userId: number,
+		publicId: string,
+	): Promise<SessionSchemaType | undefined> {
+		return this.db
+			.update(schema.sessions)
+			.set({ isRevoked: true })
+			.where(and(eq(schema.sessions.publicId, publicId), eq(schema.sessions.userId, userId)))
+			.returning()
+			.then(rows => rows[0]);
+	}
+
+	async revokeOtherActiveUserSessions(
+		userId: number,
+		currentSessionToken: string,
+		now: Date = new Date(),
+	): Promise<number> {
+		const result = await this.db
+			.update(schema.sessions)
+			.set({ isRevoked: true })
+			.where(
+				and(
+					eq(schema.sessions.userId, userId),
+					eq(schema.sessions.isRevoked, false),
+					gt(schema.sessions.expiresAt, now),
+					ne(schema.sessions.token, currentSessionToken),
+				),
+			)
+			.returning({ id: schema.sessions.id });
+
+		return result.length;
 	}
 
 	async revokeAllUserSessions(userId: number): Promise<number> {

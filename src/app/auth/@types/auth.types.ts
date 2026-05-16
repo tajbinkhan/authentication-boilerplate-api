@@ -16,3 +16,22 @@ export type SessionDataType = Omit<
 export type UserWithoutPasswordResponse = Omit<UserSchemaType, 'id' | 'publicId' | 'password'> & {
 	id: string;
 };
+
+export type SessionStatus = 'active' | 'revoked' | 'expired';
+
+export type SessionResponse = Pick<
+	SessionSchemaType,
+	| 'isRevoked'
+	| 'twoFactorVerified'
+	| 'createdAt'
+	| 'updatedAt'
+	| 'expiresAt'
+> & {
+	id: string;
+	deviceName: string;
+	deviceType: string;
+	ipAddress: string;
+	userAgent: string;
+	status: SessionStatus;
+	isCurrent: boolean;
+};
