@@ -12,7 +12,7 @@ export class AppController {
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>Operon API — Service Status</title>
+	<title>Boilerplate API — Service Status</title>
 	<style>
 		:root {
 			--page: #f5f7fb;
@@ -534,7 +534,7 @@ export class AppController {
 <body>
 	<div class="shell">
 		<header class="topbar" aria-label="Service header">
-			<div class="brand">
+				<div class="brand">
 				<span class="mark" aria-hidden="true">
 					<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
 						<path d="M12 3l7.5 4.25v8.5L12 20 4.5 15.75v-8.5L12 3z" />
@@ -542,7 +542,7 @@ export class AppController {
 						<path d="M12 11.5V16" />
 					</svg>
 				</span>
-				<span>Operon API</span>
+				<span>Boilerplate API</span>
 			</div>
 			<span class="status-pill"><span class="pulse"></span>API ready</span>
 		</header>
@@ -551,10 +551,10 @@ export class AppController {
 			<section class="hero" aria-labelledby="page-title">
 				<div class="hero-copy">
 					<p class="kicker">NestJS service gateway</p>
-					<h1 id="page-title">Operon API</h1>
+					<h1 id="page-title">Boilerplate API</h1>
 					<p class="lede">
-						A focused backend surface for authentication, media, planning, tracker, attendance,
-						leave, calendar, and CSRF-protected admin workflows. Use this page as a compact map
+						A focused backend surface for authentication, media, user administration,
+						integrations, and CSRF-protected admin workflows. Use this page as a compact map
 						of the routes currently exposed by the service.
 					</p>
 					<div class="quick-actions" aria-label="Quick links">
@@ -597,20 +597,20 @@ export class AppController {
 <span class="command">curl</span> <span class="value">http://localhost:3000/csrf</span>
 
 <span class="comment"># authenticated work routes</span>
-<span class="command">GET</span> <span class="value">/projects</span>
-<span class="command">GET</span> <span class="value">/issues</span>
-<span class="command">POST</span> <span class="value">/tracker</span></pre>
+					<span class="command">GET</span> <span class="value">/users</span>
+					<span class="command">GET</span> <span class="value">/auth/me</span>
+					<span class="command">POST</span> <span class="value">/auth/magic-link/request</span></pre>
 					</div>
 				</aside>
 			</section>
 
 			<section class="metrics" aria-label="API summary">
 				<div class="metric">
-					<strong>8</strong>
+					<strong>4</strong>
 					<span>API modules</span>
 				</div>
 				<div class="metric">
-					<strong>58</strong>
+					<strong>29</strong>
 					<span>routes in inventory</span>
 				</div>
 				<div class="metric">
@@ -701,8 +701,8 @@ export class AppController {
 							<p>Upload, read, update, and delete media assets through the protected <code>/media</code> endpoints.</p>
 						</article>
 						<article class="domain">
-							<h3><span class="dot amber"></span>Planning</h3>
-							<p>Project, sprint, issue, tracker, attendance, leave, and calendar workflows are available across the main route surface.</p>
+							<h3><span class="dot amber"></span>Integrations</h3>
+							<p>Internal integrations and connector modules (e.g., <code>brevo</code>, <code>template</code>) provide background services and external API wiring.</p>
 						</article>
 						<article class="domain">
 							<h3><span class="dot rose"></span>Security</h3>
@@ -723,14 +723,14 @@ export class AppController {
 					<li>
 						<div>
 							<strong>Root route contract</strong>
-							<span>See <code>docs/api-root-open-route.md</code> for the public HTML endpoint behavior.</span>
+							<span>See <code>docs/api/README.md</code> for the public HTML endpoint behavior and status page notes.</span>
 						</div>
 						<code>HTML</code>
 					</li>
 					<li>
 						<div>
 							<strong>Planning endpoints</strong>
-							<span>See <code>docs/planning/planning-projects-sprints-endpoints.md</code> for project and sprint route details.</span>
+							<span>See <code>docs/planning/users-management.md</code> and other files under <code>docs/planning/</code> for planning and project routes.</span>
 						</div>
 						<code>JWT</code>
 					</li>
@@ -744,15 +744,15 @@ export class AppController {
 					<li>
 						<div>
 							<strong>Frontend guide</strong>
-							<span>See <code>docs/frontend-ui-api-guide.md</code> for API-to-UI mapping and UX guidance.</span>
+							<span>See <code>docs/api/README.md</code> and module docs under <code>docs/api/</code> for API-to-UI mapping and integration guidance.</span>
 						</div>
 						<code>UI</code>
 					</li>
 				</ul>
 			</section>
 		</main>
-		<footer class="footer">
-			<span>Operon backend status page</span>
+			<footer class="footer">
+			<span>Boilerplate backend status page</span>
 			<span>Built with NestJS, Drizzle, PostgreSQL, and Jest</span>
 		</footer>
 	</div>

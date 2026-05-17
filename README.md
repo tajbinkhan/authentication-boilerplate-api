@@ -1,8 +1,8 @@
-# Operon API
+# Boilerplate API
 
-Operon API is the primary NestJS backend for Operon services. It provides authentication, media
-management, CSRF-protected mutating endpoints, and a consistent API surface used by Operon frontends
-and integrations.
+`boilerplate-api` is the primary NestJS backend in this workspace. It provides authentication, media
+management, CSRF-protected mutating endpoints, and a consistent API surface used by frontends and
+integrations.
 
 ## Overview
 
@@ -18,6 +18,17 @@ and integrations.
 - Drizzle ORM + PostgreSQL
 - Zod for environment and request validation
 - Jest for unit and e2e testing
+
+## Modules
+
+- `auth` — Authentication, magic-links, Google login, sessions, and 2FA (several endpoints, ~17
+  handlers).
+- `csrf` — CSRF token issuance (1 handler).
+- `media` — Media upload, listing, update, delete (4 handlers).
+- `users` — Admin user management and session controls (7 handlers).
+
+Summary: 4 public API modules and approximately 29 route handlers across the controllers under
+`src/app/`.
 
 ## Quick Start
 
@@ -68,6 +79,10 @@ pnpm run lint
 - CSRF token: `/csrf` (issues CSRF cookie + response token).
 - Current user: `/auth/me` (requires JWT).
 - Media endpoints: `/media` (JWT + CSRF for mutating requests).
+
+The status page served at `/` is implemented in `src/app.controller.ts` and intentionally links to
+module documentation under `docs/api/`. When adding or removing controllers, regenerate
+`routes.json` so the route inventory stays accurate.
 
 Use controllers and `docs/api/` as the source of truth for API contracts. `routes.json` is a
 generated route inventory when the app is able to regenerate it.
