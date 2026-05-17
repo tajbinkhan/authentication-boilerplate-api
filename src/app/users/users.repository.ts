@@ -25,6 +25,12 @@ export class UsersRepository {
 		});
 	}
 
+	findUserByEmail(email: string): Promise<UserSchemaType | undefined> {
+		return this.db.query.users.findFirst({
+			where: eq(schema.users.email, email),
+		});
+	}
+
 	async listUsers(query: UsersListQueryDto): Promise<{
 		rows: UserManagementRow[];
 		total: number;
@@ -72,6 +78,14 @@ export class UsersRepository {
 		};
 	}
 
+	async createUser(data: typeof schema.users.$inferInsert): Promise<UserSchemaType | undefined> {
+		return this.db
+			.insert(schema.users)
+			.values(data)
+			.returning()
+			.then(rows => rows[0]);
+	}
+
 	async findUserManagementRowById(userId: number): Promise<UserManagementRow | undefined> {
 		const activeSessionCount = this.activeSessionCountSql(new Date());
 
@@ -96,6 +110,18 @@ export class UsersRepository {
 			.then(rows => rows[0]);
 	}
 
+	async updateUser(
+		userId: number,
+		data: Partial<typeof schema.users.$inferInsert>,
+	): Promise<UserSchemaType | undefined> {
+		return this.db
+			.update(schema.users)
+			.set(data)
+			.where(eq(schema.users.id, userId))
+			.returning()
+			.then(rows => rows[0]);
+	}
+
 	async updateUserRole(
 		userId: number,
 		role: UserSchemaType['role'],
@@ -103,6 +129,14 @@ export class UsersRepository {
 		return this.db
 			.update(schema.users)
 			.set({ role })
+			.where(eq(schema.users.id, userId))
+			.returning()
+			.then(rows => rows[0]);
+	}
+
+	async deleteUser(userId: number): Promise<UserSchemaType | undefined> {
+		return this.db
+			.delete(schema.users)
 			.where(eq(schema.users.id, userId))
 			.returning()
 			.then(rows => rows[0]);

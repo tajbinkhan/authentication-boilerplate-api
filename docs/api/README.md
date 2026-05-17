@@ -9,7 +9,7 @@ not from `routes.json`.
 - [Auth](auth.md): magic links, Google login, logout, session management, and profile routes.
 - [Media](media.md): media upload, listing, update, and deletion routes.
 - [CSRF](csrf.md): CSRF token issuing and unsafe-method protection.
-- [Users](users.md): admin user directory, role updates, and session revocation.
+- [Users](users.md): admin user directory, user CRUD, role updates, and session revocation.
 
 `brevo` and `template` are internal app modules and do not expose public API routes.
 

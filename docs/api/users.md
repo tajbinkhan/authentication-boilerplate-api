@@ -5,6 +5,12 @@ Admin-only user directory and access-management endpoints.
 All routes require the `access-token` HTTP-only cookie and the caller must have an admin role.
 Unsafe methods require a CSRF token from `GET /csrf` sent as `x-csrf-token`.
 
+Authorization rules for management actions:
+
+- `SUPER_ADMIN` can manage any non-self user and can assign any role.
+- `ADMIN` can manage only `USER` and `MANAGER` users and can assign only `USER` or `MANAGER`.
+- Users cannot manage their own account through this module.
+
 ## `GET /users`
 
 Lists users for the dashboard directory.
@@ -63,15 +69,97 @@ GET /users?page=1&pageSize=25&role=USER,MANAGER&emailVerified=true&sort=createdA
 }
 ```
 
+## `POST /users`
+
+Creates a managed user account.
+
+### Body
+
+```json
+{
+	"name": "Avery Stone",
+	"email": "avery@example.com",
+	"password": "Passw0rd",
+	"phone": "+14155552671",
+	"emailVerified": true,
+	"is2faEnabled": false,
+	"role": "USER"
+}
+```
+
+`name`, `password`, `phone`, `emailVerified`, and `is2faEnabled` are optional. Empty optional
+strings are stored as `null`. Email addresses are normalized to lowercase. Role assignment follows
+the hierarchy rules above.
+
+### Example Success
+
+```json
+{
+	"statusCode": 201,
+	"message": "User created successfully",
+	"data": {
+		"id": "9c0b55fe-4e2f-4fd0-8ce2-fc0f8f39a0c7",
+		"name": "Avery Stone",
+		"email": "avery@example.com",
+		"image": null,
+		"phone": "+14155552671",
+		"emailVerified": true,
+		"is2faEnabled": false,
+		"role": "USER",
+		"activeSessionCount": 0,
+		"createdAt": "2026-05-17T10:00:00.000Z",
+		"updatedAt": "2026-05-17T10:00:00.000Z"
+	},
+	"timestamp": "2026-05-17T10:00:00.000Z",
+	"path": "/users"
+}
+```
+
+## `PATCH /users/:id`
+
+Updates a target user's account fields. `:id` is the public user UUID.
+
+### Body
+
+At least one field is required.
+
+```json
+{
+	"name": "Avery Stone",
+	"email": "avery.stone@example.com",
+	"phone": "+14155552671",
+	"emailVerified": true,
+	"is2faEnabled": false
+}
+```
+
+### Example Success
+
+```json
+{
+	"statusCode": 200,
+	"message": "User updated successfully",
+	"data": {
+		"id": "9c0b55fe-4e2f-4fd0-8ce2-fc0f8f39a0c7",
+		"name": "Avery Stone",
+		"email": "avery.stone@example.com",
+		"image": null,
+		"phone": "+14155552671",
+		"emailVerified": true,
+		"is2faEnabled": false,
+		"role": "USER",
+		"activeSessionCount": 2,
+		"createdAt": "2026-05-17T10:00:00.000Z",
+		"updatedAt": "2026-05-17T10:05:00.000Z"
+	},
+	"timestamp": "2026-05-17T10:05:00.000Z",
+	"path": "/users/9c0b55fe-4e2f-4fd0-8ce2-fc0f8f39a0c7"
+}
+```
+
 ## `PATCH /users/:id/role`
 
 Updates a user's role. `:id` is the public user UUID.
-
-Authorization rules:
-
-- `SUPER_ADMIN` can update any non-self user's role.
-- `ADMIN` can update only `USER` and `MANAGER` users and can assign only `USER` or `MANAGER`.
-- Users cannot update their own role through this endpoint.
 
 ### Body
 
@@ -105,11 +193,29 @@ Authorization rules:
 }
 ```
 
+## `DELETE /users/:id`
+
+Deletes a target user. `:id` is the public user UUID.
+
+### Example Success
+
+```json
+{
+	"statusCode": 200,
+	"message": "User deleted successfully",
+	"data": {
+		"deleted": true
+	},
+	"timestamp": "2026-05-17T10:08:00.000Z",
+	"path": "/users/9c0b55fe-4e2f-4fd0-8ce2-fc0f8f39a0c7"
+}
+```
+
 ## `POST /users/:id/sessions/revoke`
 
 Revokes all non-revoked sessions for a target user. `:id` is the public user UUID.
 
-The same conservative management rules from role updates apply.
+The same conservative management rules apply.
 
 ### Example Success
 
@@ -129,7 +235,7 @@ The same conservative management rules from role updates apply.
 
 Validation errors use `code: "validation_failed"`. Missing or invalid auth uses `unauthorized`.
 Insufficient role or hierarchy violations use `forbidden`. Missing target users use
-`user_not_found`.
+`user_not_found`. Duplicate emails use `email_already_exists`.
 
 ```json
 {

@@ -43,6 +43,10 @@ export interface UserListResponse {
 	pageSize: number;
 }
 
+export interface DeleteUserResponse {
+	deleted: boolean;
+}
+
 export interface RevokeUserSessionsResponse {
 	revokedCount: number;
 }

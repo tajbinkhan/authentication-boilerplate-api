@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import * as bcrypt from 'bcryptjs';
 
-import { notFoundError } from '../../core/errors/domain-error';
+import { conflictError, isDatabaseUniqueViolation, notFoundError } from '../../core/errors/domain-error';
 import type { UserWithoutPassword } from '../auth/@types/auth.types';
 import type {
+	DeleteUserResponse,
 	RevokeUserSessionsResponse,
 	UserListResponse,
 	UserManagementResponse,
@@ -10,7 +12,12 @@ import type {
 import { mapUserManagementResponse } from './users.mapper';
 import { UsersPolicy } from './users.policy';
 import { UsersRepository } from './users.repository';
-import type { UpdateUserRoleDto, UsersListQueryDto } from './users.schema';
+import type {
+	CreateUserDto,
+	UpdateUserDto,
+	UpdateUserRoleDto,
+	UsersListQueryDto,
+} from './users.schema';
 
 @Injectable()
 export class UsersService {
@@ -27,6 +34,64 @@ export class UsersService {
 		};
 	}
 
+	async createUser(
+		currentUser: UserWithoutPassword,
+		data: CreateUserDto,
+	): Promise<UserManagementResponse> {
+		UsersPolicy.assertCanAssignRole(currentUser, data.role);
+		await this.assertEmailAvailable(data.email);
+
+		const password = data.password ? await bcrypt.hash(data.password, 10) : null;
+
+		try {
+			const createdUser = await this.usersRepository.createUser({
+				name: data.name ?? null,
+				email: data.email,
+				password,
+				phone: data.phone ?? null,
+				emailVerified: data.emailVerified ?? false,
+				is2faEnabled: data.is2faEnabled ?? false,
+				role: data.role,
+			});
+
+			if (!createdUser) throw notFoundError('user_not_found', 'User not found');
+
+			return this.getManagementResponse(createdUser.id);
+		} catch (error) {
+			this.throwEmailConflictIfUniqueViolation(error);
+			throw error;
+		}
+	}
+
+	async updateUser(
+		currentUser: UserWithoutPassword,
+		publicId: string,
+		data: UpdateUserDto,
+	): Promise<UserManagementResponse> {
+		const targetUser = await this.getTargetUser(publicId);
+
+		UsersPolicy.assertCanManageUser(currentUser, targetUser);
+
+		if (data.email && data.email !== targetUser.email) {
+			await this.assertEmailAvailable(data.email, targetUser.id);
+		}
+
+		try {
+			await this.usersRepository.updateUser(targetUser.id, {
+				...(Object.prototype.hasOwnProperty.call(data, 'name') ? { name: data.name ?? null } : {}),
+				...(data.email ? { email: data.email } : {}),
+				...(Object.prototype.hasOwnProperty.call(data, 'phone') ? { phone: data.phone ?? null } : {}),
+				...(typeof data.emailVerified === 'boolean' ? { emailVerified: data.emailVerified } : {}),
+				...(typeof data.is2faEnabled === 'boolean' ? { is2faEnabled: data.is2faEnabled } : {}),
+			});
+
+			return this.getManagementResponse(targetUser.id);
+		} catch (error) {
+			this.throwEmailConflictIfUniqueViolation(error);
+			throw error;
+		}
+	}
+
 	async updateUserRole(
 		currentUser: UserWithoutPassword,
 		publicId: string,
@@ -41,10 +106,21 @@ export class UsersService {
 			await this.usersRepository.updateUserRole(targetUser.id, data.role);
 		}
 
-		const updatedUser = await this.usersRepository.findUserManagementRowById(targetUser.id);
-		if (!updatedUser) throw notFoundError('user_not_found', 'User not found');
+		return this.getManagementResponse(targetUser.id);
+	}
 
-		return mapUserManagementResponse(updatedUser);
+	async deleteUser(
+		currentUser: UserWithoutPassword,
+		publicId: string,
+	): Promise<DeleteUserResponse> {
+		const targetUser = await this.getTargetUser(publicId);
+
+		UsersPolicy.assertCanManageUser(currentUser, targetUser);
+
+		const deletedUser = await this.usersRepository.deleteUser(targetUser.id);
+		if (!deletedUser) throw notFoundError('user_not_found', 'User not found');
+
+		return { deleted: true };
 	}
 
 	async revokeUserSessions(
@@ -66,5 +142,26 @@ export class UsersService {
 		if (!targetUser) throw notFoundError('user_not_found', 'User not found');
 
 		return targetUser;
+	}
+
+	private async getManagementResponse(userId: number): Promise<UserManagementResponse> {
+		const user = await this.usersRepository.findUserManagementRowById(userId);
+		if (!user) throw notFoundError('user_not_found', 'User not found');
+
+		return mapUserManagementResponse(user);
+	}
+
+	private async assertEmailAvailable(email: string, excludedUserId?: number): Promise<void> {
+		const existingUser = await this.usersRepository.findUserByEmail(email);
+
+		if (existingUser && existingUser.id !== excludedUserId) {
+			throw conflictError('email_already_exists', 'A user with this email already exists.');
+		}
+	}
+
+	private throwEmailConflictIfUniqueViolation(error: unknown): void {
+		if (isDatabaseUniqueViolation(error)) {
+			throw conflictError('email_already_exists', 'A user with this email already exists.');
+		}
 	}
 }

@@ -2,8 +2,9 @@
 
 ## Goal
 
-Add an admin-only users management module for listing user accounts, updating user roles, and
-revoking a target user's sessions from the dashboard.
+Add an admin-only users management module for listing user accounts, creating managed accounts,
+updating user profile/access fields, updating roles, deleting users, and revoking a target user's
+sessions from the dashboard.
 
 ## Decisions
 
@@ -14,13 +15,18 @@ revoking a target user's sessions from the dashboard.
 - Apply conservative management rules in service policy code:
   - `SUPER_ADMIN` can manage all non-self users.
   - `ADMIN` can manage only `USER` and `MANAGER` users.
-  - No user can update their own role or revoke their own sessions through this module.
-- Keep user deletion out of scope for the first version.
+  - No user can create or update roles outside their assignable hierarchy.
+  - No user can manage their own account through this module.
+- User deletion is in scope for the management module and relies on existing cascade/set-null
+  database relationships.
 
 ## API Surface
 
 - `GET /users`: list users with search, filters, sorting, and pagination.
+- `POST /users`: create a managed user account.
+- `PATCH /users/:id`: update account fields such as name, email, phone, verification, and 2FA flag.
 - `PATCH /users/:id/role`: update a target user's role.
+- `DELETE /users/:id`: delete a target user.
 - `POST /users/:id/sessions/revoke`: revoke a target user's non-revoked sessions.
 
 ## Dashboard Surface
@@ -28,3 +34,5 @@ revoking a target user's sessions from the dashboard.
 - Add `/users` to the dashboard route group and Platform navigation.
 - Reuse the existing table, filter, dialog, select, alert, badge, avatar, and button components.
 - Keep filters in URL state with `nuqs` and server state in TanStack Query.
+- Provide create, edit, role-change, session-revoke, and delete actions wherever the current admin
+  can manage the target user.

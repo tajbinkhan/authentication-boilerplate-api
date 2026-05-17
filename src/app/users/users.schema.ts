@@ -1,6 +1,13 @@
 import { z } from 'zod';
 
-import { validateEnum, validateString } from '../../core/validators/common.schema';
+import {
+	validateBoolean,
+	validateEmail,
+	validateEnum,
+	validatePassword,
+	validatePhoneNumber,
+	validateString,
+} from '../../core/validators/common.schema';
 import { baseQuerySchema, type SortableField } from '../../core/validators/base-query.schema';
 import { roleTypeEnum } from '../../models/drizzle/enum.model';
 
@@ -52,5 +59,58 @@ export const updateUserRoleSchema = z
 	})
 	.strict();
 
+const optionalNullableString = (name: string, max = 255) =>
+	z
+		.preprocess(value => {
+			if (value === null) return null;
+			if (typeof value !== 'string') return undefined;
+
+			const trimmed = value.trim();
+			return trimmed || null;
+		}, validateString(name, { max }).nullable().optional());
+
+const optionalNullablePhone = z.preprocess(value => {
+	if (value === null) return null;
+	if (typeof value !== 'string') return undefined;
+
+	const trimmed = value.trim();
+	return trimmed || null;
+}, validatePhoneNumber('Phone').nullable().optional());
+
+const optionalNullablePassword = z.preprocess(value => {
+	if (value === null) return null;
+	if (typeof value !== 'string') return undefined;
+
+	const trimmed = value.trim();
+	return trimmed || null;
+}, validatePassword.nullable().optional());
+
+export const createUserSchema = z
+	.object({
+		name: optionalNullableString('Name'),
+		email: validateEmail.transform(value => value.toLowerCase()),
+		password: optionalNullablePassword,
+		phone: optionalNullablePhone,
+		emailVerified: validateBoolean('Email Verified').optional(),
+		is2faEnabled: validateBoolean('Two-factor Authentication').optional(),
+		role: validateEnum('Role', userRoleValues),
+	})
+	.strict();
+
+export const updateUserSchema = z
+	.object({
+		name: optionalNullableString('Name'),
+		email: validateEmail.transform(value => value.toLowerCase()).optional(),
+		phone: optionalNullablePhone,
+		emailVerified: validateBoolean('Email Verified').optional(),
+		is2faEnabled: validateBoolean('Two-factor Authentication').optional(),
+	})
+	.strict()
+	.refine(data => Object.keys(data).length > 0, {
+		error: 'At least one user field must be provided',
+	});
+
 export type UsersListQueryDto = z.infer<typeof usersListQuerySchema>;
+export type CreateUserDto = z.infer<typeof createUserSchema>;
+export type UpdateUserDto = z.infer<typeof updateUserSchema>;
 export type UpdateUserRoleDto = z.infer<typeof updateUserRoleSchema>;
