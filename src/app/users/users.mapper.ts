@@ -1,0 +1,17 @@
+import type { UserManagementResponse, UserManagementRow } from './@types/users.types';
+
+export function mapUserManagementResponse(row: UserManagementRow): UserManagementResponse {
+	return {
+		id: row.publicId,
+		name: row.name,
+		email: row.email,
+		image: row.image,
+		phone: row.phone,
+		emailVerified: row.emailVerified,
+		is2faEnabled: row.is2faEnabled,
+		role: row.role,
+		activeSessionCount: Number(row.activeSessionCount ?? 0),
+		createdAt: row.createdAt,
+		updatedAt: row.updatedAt,
+	};
+}
