@@ -1,9 +1,9 @@
-name: operon
+name: boilerplate
 
 services:
   postgres:
     image: postgres:latest
-    container_name: operon-postgres
+    container_name: boilerplate-postgres
     restart: on-failure
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
