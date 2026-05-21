@@ -2,20 +2,20 @@ import { Inject, Injectable } from '@nestjs/common';
 import { and, count, desc, eq, gt, gte, ilike, inArray, lte, ne, or, type SQL } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
-import { DATABASE_CONNECTION } from '../../database/connection';
-import { orderByColumn } from '../../database/helpers';
-import schema from '../../database/schema';
-import type { SessionSchemaType } from '../../database/types';
-import type { SessionDataType, SessionStatus } from './@types/auth.types';
-import type { SessionListQueryDto } from './auth.schema';
+import { DATABASE_CONNECTION } from '../../../database/connection';
+import { orderByColumn } from '../../../database/helpers';
+import schema from '../../../database/schema';
+import type { SessionSchemaType } from '../../../database/types';
+import type { SessionListQueryDto } from './session.schema';
+import type { SessionDataType, SessionStatus } from './session.types';
 
-export type AuthSessionDatabase = NodePgDatabase<typeof schema>;
+export type SessionDatabase = NodePgDatabase<typeof schema>;
 
 @Injectable()
-export class AuthSessionRepository {
+export class SessionRepository {
 	constructor(
 		@Inject(DATABASE_CONNECTION)
-		private readonly db: AuthSessionDatabase,
+		private readonly db: SessionDatabase,
 	) {}
 
 	async createSession(data: SessionDataType): Promise<SessionSchemaType> {

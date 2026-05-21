@@ -6,17 +6,17 @@ import { PassportModule } from '@nestjs/passport';
 import { sessionTimeout } from '../../core/helpers/constant.helpers';
 import { EnvType } from '../../core/validators/env';
 import { BrevoModule } from '../brevo/brevo.module';
-import { AuthController } from './auth.controller';
-import { AUTH_CLOUDINARY_SERVICE, authCloudinaryProvider } from './auth.providers';
-import { AuthRepository } from './auth.repository';
-import { AuthService } from './auth.service';
-import { AuthSessionRepository } from './auth-session.repository';
-import { AuthSession } from './auth.session';
-import { AuthTwoFactorRepository } from './auth-two-factor.repository';
-import { AuthTwoFactorService } from './auth-two-factor.service';
+import { AUTH_CLOUDINARY_SERVICE, authCloudinaryProvider } from './core/auth.providers';
+import { AuthRepository } from './core/auth.repository';
+import { AuthService } from './core/auth.service';
+import { SessionRepository } from './session/session.repository';
+import { SessionService } from './session/session.service';
+import { TwoFactorRepository } from './two-factor/two-factor.repository';
+import { TwoFactorService } from './two-factor/two-factor.service';
 import { MagicLinkEmailService } from './services/magic-link-email.service';
-import { JwtPartialStrategy } from './strategies/jwt-partial.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { JwtPartialStrategy } from './strategies/jwt-partial.strategy';
+import { AuthController } from './auth.controller';
 
 @Module({
 	imports: [
@@ -36,14 +36,14 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 		AuthRepository,
 		JwtStrategy,
 		JwtPartialStrategy,
-		AuthSession,
-		AuthSessionRepository,
-		AuthTwoFactorService,
-		AuthTwoFactorRepository,
+		SessionService,
+		SessionRepository,
+		TwoFactorService,
+		TwoFactorRepository,
 		MagicLinkEmailService,
 		authCloudinaryProvider,
 	],
 	controllers: [AuthController],
-	exports: [AuthService, AuthTwoFactorService, AUTH_CLOUDINARY_SERVICE],
+	exports: [AuthService, TwoFactorService, AUTH_CLOUDINARY_SERVICE],
 })
 export class AuthModule {}

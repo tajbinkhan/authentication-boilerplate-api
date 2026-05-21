@@ -18,8 +18,8 @@ import { Roles } from '../../core/decorators/roles.decorator';
 import { RolesGuard } from '../../core/guards/roles.guard';
 import { ApiResponse, createApiResponse } from '../../core/interceptors/api-response.interceptor';
 import { ZodValidationPipe } from '../../core/pipes/zod-validation.pipe';
-import type { UserWithoutPassword } from '../auth/@types/auth.types';
-import { JwtAuthGuard } from '../auth/auth.guard';
+import type { UserWithoutPassword } from '../auth/core/auth.types';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import type {
 	DeleteUserResponse,
 	RevokeUserSessionsResponse,

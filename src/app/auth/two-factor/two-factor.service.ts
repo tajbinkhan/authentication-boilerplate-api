@@ -8,20 +8,21 @@ import {
 	badRequestError,
 	notFoundError,
 	unauthorizedError,
-} from '../../core/errors/domain-error';
-import { EnvType } from '../../core/validators/env';
-import { CryptoService } from '../../crypto/crypto.service';
-import type { SessionSchemaType, UserSchemaType } from '../../database/types';
+} from '../../../core/errors/domain-error';
+import { EnvType } from '../../../core/validators/env';
+import { CryptoService } from '../../../crypto/crypto.service';
+import type { SessionSchemaType, UserSchemaType } from '../../../database/types';
+import type { UserWithoutPassword } from '../core/auth.types';
+import { SessionService } from '../session/session.service';
+
+import { TwoFactorRepository } from './two-factor.repository';
 import type {
 	TwoFactorDisableResponse,
 	TwoFactorRecoveryCodesResponse,
 	TwoFactorSetupStartResponse,
 	TwoFactorStatusResponse,
 	TwoFactorVerifyResponse,
-	UserWithoutPassword,
-} from './@types/auth.types';
-import { AuthSession } from './auth.session';
-import { AuthTwoFactorRepository } from './auth-two-factor.repository';
+} from './two-factor.types';
 
 const setupExpiresMs = 10 * 60 * 1000;
 const recoveryCodeCount = 10;
@@ -29,10 +30,10 @@ const twoFactorMaxAttempts = 5;
 const twoFactorLockMs = 10 * 60 * 1000;
 
 @Injectable()
-export class AuthTwoFactorService {
+export class TwoFactorService {
 	constructor(
-		private readonly twoFactorRepository: AuthTwoFactorRepository,
-		private readonly authSession: AuthSession,
+		private readonly twoFactorRepository: TwoFactorRepository,
+		private readonly sessionService: SessionService,
 		private readonly cryptoService: CryptoService,
 		private readonly configService: ConfigService<EnvType, true>,
 	) {}
@@ -115,7 +116,7 @@ export class AuthTwoFactorService {
 			await this.twoFactorRepository.replaceRecoveryCodes(user.id, recoveryCodeHashes, tx);
 			await this.twoFactorRepository.deleteSetupByUserId(user.id, tx);
 		});
-		await this.authSession.markTwoFactorVerified(session.id);
+		await this.sessionService.markTwoFactorVerified(session.id);
 
 		return { recoveryCodes };
 	}
@@ -128,7 +129,7 @@ export class AuthTwoFactorService {
 		const userWithSecret = await this.getUserWithSecret(user.id);
 
 		if (!userWithSecret.is2faEnabled) {
-			await this.authSession.markTwoFactorVerified(session.id);
+			await this.sessionService.markTwoFactorVerified(session.id);
 			return { verified: true };
 		}
 
@@ -141,7 +142,7 @@ export class AuthTwoFactorService {
 			throw unauthorizedError('Invalid two-factor code.');
 		}
 
-		await this.authSession.markTwoFactorVerified(session.id);
+		await this.sessionService.markTwoFactorVerified(session.id);
 
 		return { verified: true };
 	}
@@ -173,7 +174,7 @@ export class AuthTwoFactorService {
 			await this.twoFactorRepository.deleteRecoveryCodesByUserId(user.id, tx);
 		});
 
-		const revokedOtherSessionCount = await this.authSession.revokeOtherUserSessions(
+		const revokedOtherSessionCount = await this.sessionService.revokeOtherUserSessions(
 			user.id,
 			currentSessionToken,
 		);
@@ -217,7 +218,7 @@ export class AuthTwoFactorService {
 			await this.twoFactorRepository.deleteRecoveryCodesByUserId(userId, tx);
 		});
 
-		const revokedCount = await this.authSession.revokeAllUserSessions(userId);
+		const revokedCount = await this.sessionService.revokeAllUserSessions(userId);
 
 		return { reset: true, revokedCount };
 	}
@@ -242,9 +243,7 @@ export class AuthTwoFactorService {
 
 		if (!recoveryCode) return false;
 
-		const usedRecoveryCode = await this.twoFactorRepository.markRecoveryCodeUsed(
-			recoveryCode.id,
-		);
+		const usedRecoveryCode = await this.twoFactorRepository.markRecoveryCodeUsed(recoveryCode.id);
 
 		return Boolean(usedRecoveryCode);
 	}
@@ -272,7 +271,7 @@ export class AuthTwoFactorService {
 			});
 		}
 
-		await this.authSession.updateTwoFactorFailureState(session.id, {
+		await this.sessionService.updateTwoFactorFailureState(session.id, {
 			twoFactorFailedAttempts: 0,
 			twoFactorLockedUntil: null,
 		});
@@ -287,7 +286,7 @@ export class AuthTwoFactorService {
 		const nextAttempts = currentAttempts + 1;
 		const shouldLock = nextAttempts >= twoFactorMaxAttempts;
 
-		await this.authSession.updateTwoFactorFailureState(session.id, {
+		await this.sessionService.updateTwoFactorFailureState(session.id, {
 			twoFactorFailedAttempts: nextAttempts,
 			twoFactorLockedUntil: shouldLock ? new Date(Date.now() + twoFactorLockMs) : null,
 		});

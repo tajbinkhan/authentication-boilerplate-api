@@ -30,19 +30,8 @@ import {
 import { ZodValidationPipe } from '../../core/pipes/zod-validation.pipe';
 import { EnvType } from '../../core/validators/env';
 import { FILE_SIZE_LIMIT, singleFileSchema, ZodFileValidationPipe } from '../media/media.pipe';
-import type {
-	SessionListResponse,
-	SessionResponse,
-	TwoFactorDisableResponse,
-	TwoFactorRecoveryCodesResponse,
-	TwoFactorSetupStartResponse,
-	TwoFactorStatusResponse,
-	TwoFactorVerifyResponse,
-	UserWithoutPassword,
-	UserWithoutPasswordResponse,
-} from './@types/auth.types';
-import { JwtAuthGuard } from './auth.guard';
-import { mapSessionResponse, mapUserResponse } from './auth.mapper';
+import type { UserWithoutPassword, UserWithoutPasswordResponse } from './core/auth.types';
+import { mapUserResponse } from './core/auth.mapper';
 import {
 	type GoogleLoginDto,
 	googleLoginSchema,
@@ -50,25 +39,42 @@ import {
 	magicLinkRequestSchema,
 	type MagicLinkVerifyDto,
 	magicLinkVerifySchema,
-	type SessionListQueryDto,
-	sessionListQuerySchema,
-	type TwoFactorCodeDto,
-	twoFactorCodeSchema,
 	type UpdateProfileDto,
 	updateProfileSchema,
-} from './auth.schema';
-import { AuthService } from './auth.service';
-import { AuthSession } from './auth.session';
-import { AuthTwoFactorService } from './auth-two-factor.service';
-import { PartialJwtAuthGuard } from './partial-jwt-auth.guard';
+} from './core/auth.schema';
+import { AuthService } from './core/auth.service';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { PartialJwtAuthGuard } from './guards/partial-jwt-auth.guard';
+import { mapSessionResponse } from './session/session.mapper';
+import { SessionService } from './session/session.service';
+import {
+	type SessionListQueryDto,
+	sessionListQuerySchema,
+} from './session/session.schema';
+import type {
+	SessionListResponse,
+	SessionResponse,
+} from './session/session.types';
+import { TwoFactorService } from './two-factor/two-factor.service';
+import {
+	type TwoFactorCodeDto,
+	twoFactorCodeSchema,
+} from './two-factor/two-factor.schema';
+import type {
+	TwoFactorDisableResponse,
+	TwoFactorRecoveryCodesResponse,
+	TwoFactorSetupStartResponse,
+	TwoFactorStatusResponse,
+	TwoFactorVerifyResponse,
+} from './two-factor/two-factor.types';
 import type { PartialAuthRequest } from './strategies/jwt-partial.strategy';
 
 @Controller('auth')
 export class AuthController {
 	constructor(
 		private readonly authService: AuthService,
-		private readonly authSession: AuthSession,
-		private readonly authTwoFactorService: AuthTwoFactorService,
+		private readonly sessionService: SessionService,
+		private readonly twoFactorService: TwoFactorService,
 		private readonly configService: ConfigService<EnvType, true>,
 	) {}
 
@@ -92,7 +98,7 @@ export class AuthController {
 		@Request() request: ExpressRequest,
 		@Res() response: Response,
 	): Promise<void> {
-		const userDeviceInfo = this.authSession.getSessionInfo(request);
+		const userDeviceInfo = this.sessionService.getSessionInfo(request);
 		const result = await this.authService.verifyMagicLink(verifyDto, userDeviceInfo);
 
 		response.cookie(
@@ -113,7 +119,7 @@ export class AuthController {
 		@Request() request: ExpressRequest,
 		@Res({ passthrough: true }) response: Response,
 	): Promise<ApiResponse<UserWithoutPasswordResponse>> {
-		const userDeviceInfo = this.authSession.getSessionInfo(request);
+		const userDeviceInfo = this.sessionService.getSessionInfo(request);
 		const result = await this.authService.verifyMagicLink(verifyDto, userDeviceInfo);
 
 		response.cookie(
@@ -138,7 +144,7 @@ export class AuthController {
 
 		if (!userId || !sessionToken) throw badRequestError('No active session found');
 
-		await this.authSession.revokeSession(userId, sessionToken);
+		await this.sessionService.revokeSession(userId, sessionToken);
 
 		request.res?.clearCookie(
 			'access-token',
@@ -153,7 +159,7 @@ export class AuthController {
 	async getTwoFactorStatus(
 		@CurrentUser() user: UserWithoutPassword,
 	): Promise<ApiResponse<TwoFactorStatusResponse>> {
-		const status = await this.authTwoFactorService.getStatus(user);
+		const status = await this.twoFactorService.getStatus(user);
 
 		return createApiResponse(HttpStatus.OK, 'Two-factor status fetched successfully', status);
 	}
@@ -164,7 +170,7 @@ export class AuthController {
 	async startTwoFactorSetup(
 		@CurrentUser() user: UserWithoutPassword,
 	): Promise<ApiResponse<TwoFactorSetupStartResponse>> {
-		const setup = await this.authTwoFactorService.startSetup(user);
+		const setup = await this.twoFactorService.startSetup(user);
 
 		return createApiResponse(HttpStatus.OK, 'Two-factor setup started successfully', setup);
 	}
@@ -178,7 +184,7 @@ export class AuthController {
 		@Body(new ZodValidationPipe(twoFactorCodeSchema)) body: TwoFactorCodeDto,
 	): Promise<ApiResponse<TwoFactorRecoveryCodesResponse>> {
 		const session = await this.getCurrentSession(user, request);
-		const result = await this.authTwoFactorService.confirmSetup(user, session, body.code);
+		const result = await this.twoFactorService.confirmSetup(user, session, body.code);
 
 		return createApiResponse(HttpStatus.OK, 'Two-factor setup confirmed successfully', result);
 	}
@@ -191,7 +197,7 @@ export class AuthController {
 		@Request() request: PartialAuthRequest,
 		@Body(new ZodValidationPipe(twoFactorCodeSchema)) body: TwoFactorCodeDto,
 	): Promise<ApiResponse<TwoFactorVerifyResponse>> {
-		const result = await this.authTwoFactorService.verifyTwoFactor(
+		const result = await this.twoFactorService.verifyTwoFactor(
 			user,
 			this.getPartialAuthSession(request),
 			body.code,
@@ -209,8 +215,8 @@ export class AuthController {
 		@Body(new ZodValidationPipe(twoFactorCodeSchema)) body: TwoFactorCodeDto,
 	): Promise<ApiResponse<TwoFactorDisableResponse>> {
 		const sessionToken = this.getSessionToken(request);
-		const session = await this.authSession.validateSession(user.id, sessionToken);
-		const result = await this.authTwoFactorService.disableTwoFactor(
+		const session = await this.sessionService.validateSession(user.id, sessionToken);
+		const result = await this.twoFactorService.disableTwoFactor(
 			user,
 			session,
 			sessionToken,
@@ -229,7 +235,7 @@ export class AuthController {
 		@Body(new ZodValidationPipe(twoFactorCodeSchema)) body: TwoFactorCodeDto,
 	): Promise<ApiResponse<TwoFactorRecoveryCodesResponse>> {
 		const session = await this.getCurrentSession(user, request);
-		const result = await this.authTwoFactorService.regenerateRecoveryCodes(
+		const result = await this.twoFactorService.regenerateRecoveryCodes(
 			user,
 			session,
 			body.code,
@@ -265,7 +271,7 @@ export class AuthController {
 
 		if (!sessionToken) throw badRequestError('No active session found');
 
-		const sessions = await this.authSession.listUserSessions(user.id, query, sessionToken);
+		const sessions = await this.sessionService.listUserSessions(user.id, query, sessionToken);
 
 		return createApiResponse(HttpStatus.OK, 'Sessions fetched successfully', sessions);
 	}
@@ -281,7 +287,7 @@ export class AuthController {
 
 		if (!sessionToken) throw badRequestError('No active session found');
 
-		const revokedCount = await this.authSession.revokeOtherUserSessions(user.id, sessionToken);
+		const revokedCount = await this.sessionService.revokeOtherUserSessions(user.id, sessionToken);
 
 		return createApiResponse(HttpStatus.OK, 'Other sessions revoked successfully', {
 			revokedCount,
@@ -300,7 +306,7 @@ export class AuthController {
 
 		if (!sessionToken) throw badRequestError('No active session found');
 
-		const revokedSession = await this.authSession.revokeUserSession(user.id, id);
+		const revokedSession = await this.sessionService.revokeUserSession(user.id, id);
 
 		if (revokedSession.token === sessionToken) {
 			request.res?.clearCookie(
@@ -362,7 +368,7 @@ export class AuthController {
 	): Promise<ApiResponse<UserWithoutPasswordResponse>> {
 		const googleProfile = await this.authService.verifyGoogleCredential(googleLoginDto.credential);
 		const user = await this.authService.findOrCreateGoogleUser(googleProfile);
-		const userDeviceInfo = this.authSession.getSessionInfo(request);
+		const userDeviceInfo = this.sessionService.getSessionInfo(request);
 
 		const accessToken = await this.authService.generateAccessToken({
 			userId: user.id,
@@ -391,7 +397,7 @@ export class AuthController {
 	}
 
 	private getCurrentSession(user: UserWithoutPassword, request: ExpressRequest) {
-		return this.authSession.validateSession(user.id, this.getSessionToken(request));
+		return this.sessionService.validateSession(user.id, this.getSessionToken(request));
 	}
 
 	private getPartialAuthSession(request: PartialAuthRequest) {

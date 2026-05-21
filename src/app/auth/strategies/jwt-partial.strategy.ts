@@ -9,8 +9,8 @@ import AppHelpers from '../../../core/helpers/app.helpers';
 import { EnvType } from '../../../core/validators/env';
 import { CryptoService } from '../../../crypto/crypto.service';
 import type { SessionSchemaType } from '../../../database/types';
-import { AuthService } from '../auth.service';
-import { AuthSession } from '../auth.session';
+import { AuthService } from '../core/auth.service';
+import { SessionService } from '../session/session.service';
 
 interface JwtPayload {
 	sub: number;
@@ -26,7 +26,7 @@ export class JwtPartialStrategy extends PassportStrategy(Strategy, 'jwt-partial'
 	constructor(
 		private readonly configService: ConfigService<EnvType, true>,
 		private readonly authService: AuthService,
-		private readonly authSession: AuthSession,
+		private readonly sessionService: SessionService,
 		private readonly cryptoService: CryptoService,
 	) {
 		super({
@@ -53,11 +53,11 @@ export class JwtPartialStrategy extends PassportStrategy(Strategy, 'jwt-partial'
 
 		if (!user.emailVerified) throw unauthorizedError('Email not verified');
 
-		const session = await this.authSession.validateSession(user.id, jwtToken);
+		const session = await this.sessionService.validateSession(user.id, jwtToken);
 		request.authSession = session;
 
-		if (this.authSession.shouldExtendSession(session)) {
-			await this.authSession.extendSession(session.id);
+		if (this.sessionService.shouldExtendSession(session)) {
+			await this.sessionService.extendSession(session.id);
 			request.res?.cookie(
 				'access-token',
 				jwtToken,

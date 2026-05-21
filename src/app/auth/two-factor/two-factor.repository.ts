@@ -2,37 +2,37 @@ import { Inject, Injectable } from '@nestjs/common';
 import { and, eq, isNull } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
-import { DATABASE_CONNECTION } from '../../database/connection';
-import schema from '../../database/schema';
+import { DATABASE_CONNECTION } from '../../../database/connection';
+import schema from '../../../database/schema';
 import type {
 	TwoFactorRecoveryCodeSchemaType,
 	TwoFactorSetupSchemaType,
 	UserSchemaType,
-} from '../../database/types';
+} from '../../../database/types';
 
-export type AuthTwoFactorDatabase = NodePgDatabase<typeof schema>;
-export type AuthTwoFactorTransaction = Parameters<
-	Parameters<AuthTwoFactorDatabase['transaction']>[0]
+export type TwoFactorDatabase = NodePgDatabase<typeof schema>;
+export type TwoFactorTransaction = Parameters<
+	Parameters<TwoFactorDatabase['transaction']>[0]
 >[0];
-export type AuthTwoFactorDbClient = Pick<
-	AuthTwoFactorDatabase,
+export type TwoFactorDbClient = Pick<
+	TwoFactorDatabase,
 	'query' | 'insert' | 'update' | 'delete'
 >;
 
 @Injectable()
-export class AuthTwoFactorRepository {
+export class TwoFactorRepository {
 	constructor(
 		@Inject(DATABASE_CONNECTION)
-		private readonly db: AuthTwoFactorDatabase,
+		private readonly db: TwoFactorDatabase,
 	) {}
 
-	transaction<T>(handler: (tx: AuthTwoFactorDbClient) => Promise<T>): Promise<T> {
+	transaction<T>(handler: (tx: TwoFactorDbClient) => Promise<T>): Promise<T> {
 		return this.db.transaction(handler);
 	}
 
 	findUserById(
 		userId: number,
-		db: AuthTwoFactorDbClient = this.db,
+		db: TwoFactorDbClient = this.db,
 	): Promise<UserSchemaType | undefined> {
 		return db.query.users.findFirst({
 			where: eq(schema.users.id, userId),
@@ -41,7 +41,7 @@ export class AuthTwoFactorRepository {
 
 	findSetupByUserId(
 		userId: number,
-		db: AuthTwoFactorDbClient = this.db,
+		db: TwoFactorDbClient = this.db,
 	): Promise<TwoFactorSetupSchemaType | undefined> {
 		return db.query.twoFactorSetups.findFirst({
 			where: eq(schema.twoFactorSetups.userId, userId),
@@ -50,7 +50,7 @@ export class AuthTwoFactorRepository {
 
 	async replaceSetup(
 		data: { userId: number; secretEncrypted: string; expiresAt: Date },
-		db: AuthTwoFactorDbClient = this.db,
+		db: TwoFactorDbClient = this.db,
 	): Promise<TwoFactorSetupSchemaType> {
 		await this.deleteSetupByUserId(data.userId, db);
 
@@ -63,7 +63,7 @@ export class AuthTwoFactorRepository {
 
 	async deleteSetupByUserId(
 		userId: number,
-		db: AuthTwoFactorDbClient = this.db,
+		db: TwoFactorDbClient = this.db,
 	): Promise<void> {
 		await db.delete(schema.twoFactorSetups).where(eq(schema.twoFactorSetups.userId, userId));
 	}
@@ -71,7 +71,7 @@ export class AuthTwoFactorRepository {
 	async enableTwoFactor(
 		userId: number,
 		secretEncrypted: string,
-		db: AuthTwoFactorDbClient = this.db,
+		db: TwoFactorDbClient = this.db,
 	): Promise<UserSchemaType | undefined> {
 		return db
 			.update(schema.users)
@@ -83,7 +83,7 @@ export class AuthTwoFactorRepository {
 
 	async disableTwoFactor(
 		userId: number,
-		db: AuthTwoFactorDbClient = this.db,
+		db: TwoFactorDbClient = this.db,
 	): Promise<UserSchemaType | undefined> {
 		return db
 			.update(schema.users)
@@ -96,7 +96,7 @@ export class AuthTwoFactorRepository {
 	async replaceRecoveryCodes(
 		userId: number,
 		codeHashes: string[],
-		db: AuthTwoFactorDbClient = this.db,
+		db: TwoFactorDbClient = this.db,
 	): Promise<void> {
 		await db
 			.delete(schema.twoFactorRecoveryCodes)
@@ -114,7 +114,7 @@ export class AuthTwoFactorRepository {
 
 	async deleteRecoveryCodesByUserId(
 		userId: number,
-		db: AuthTwoFactorDbClient = this.db,
+		db: TwoFactorDbClient = this.db,
 	): Promise<void> {
 		await db
 			.delete(schema.twoFactorRecoveryCodes)
@@ -124,7 +124,7 @@ export class AuthTwoFactorRepository {
 	findUnusedRecoveryCode(
 		userId: number,
 		codeHash: string,
-		db: AuthTwoFactorDbClient = this.db,
+		db: TwoFactorDbClient = this.db,
 	): Promise<TwoFactorRecoveryCodeSchemaType | undefined> {
 		return db.query.twoFactorRecoveryCodes.findFirst({
 			where: and(
@@ -137,7 +137,7 @@ export class AuthTwoFactorRepository {
 
 	async markRecoveryCodeUsed(
 		codeId: number,
-		db: AuthTwoFactorDbClient = this.db,
+		db: TwoFactorDbClient = this.db,
 	): Promise<TwoFactorRecoveryCodeSchemaType | undefined> {
 		return db
 			.update(schema.twoFactorRecoveryCodes)

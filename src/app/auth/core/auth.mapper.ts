@@ -1,0 +1,18 @@
+import type { UserSchemaType } from '../../../database/types';
+import type { UserWithoutPassword, UserWithoutPasswordResponse } from './auth.types';
+
+export function stripUserPassword(user: UserSchemaType): UserWithoutPassword {
+	const { password, twoFactorSecretEncrypted, ...userWithoutPassword } = user;
+	void password;
+	void twoFactorSecretEncrypted;
+
+	return userWithoutPassword;
+}
+
+export function mapUserResponse(user: UserWithoutPassword): UserWithoutPasswordResponse {
+	return {
+		...user,
+		id: user.publicId,
+		imageInformation: null,
+	};
+}

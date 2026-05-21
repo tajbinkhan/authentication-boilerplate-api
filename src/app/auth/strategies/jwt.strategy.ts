@@ -8,8 +8,8 @@ import { twoFactorRequiredError, unauthorizedError } from '../../../core/errors/
 import AppHelpers from '../../../core/helpers/app.helpers';
 import { EnvType } from '../../../core/validators/env';
 import { CryptoService } from '../../../crypto/crypto.service';
-import { AuthService } from '../auth.service';
-import { AuthSession } from '../auth.session';
+import { AuthService } from '../core/auth.service';
+import { SessionService } from '../session/session.service';
 
 interface JwtPayload {
 	sub: number;
@@ -21,7 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 	constructor(
 		private readonly configService: ConfigService<EnvType, true>,
 		private readonly authService: AuthService,
-		private readonly authSession: AuthSession,
+		private readonly sessionService: SessionService,
 		private readonly cryptoService: CryptoService,
 	) {
 		super({
@@ -53,15 +53,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 		if (!user.emailVerified) throw unauthorizedError('Email not verified');
 
 		// Check if the user session is valid
-		const session = await this.authSession.validateSession(user.id, jwtToken);
+		const session = await this.sessionService.validateSession(user.id, jwtToken);
 
 		// If user has 2FA enabled, verify the session has completed 2FA
 		if (user.is2faEnabled && !session.twoFactorVerified) {
 			throw twoFactorRequiredError('Please complete 2FA verification to access this resource.');
 		}
 
-		if (this.authSession.shouldExtendSession(session)) {
-			await this.authSession.extendSession(session.id);
+		if (this.sessionService.shouldExtendSession(session)) {
+			await this.sessionService.extendSession(session.id);
 			request.res?.cookie(
 				'access-token',
 				jwtToken,

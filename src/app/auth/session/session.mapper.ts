@@ -1,26 +1,5 @@
-import type { SessionSchemaType, UserSchemaType } from '../../database/types';
-import type {
-	SessionResponse,
-	SessionStatus,
-	UserWithoutPassword,
-	UserWithoutPasswordResponse,
-} from './@types/auth.types';
-
-export function stripUserPassword(user: UserSchemaType): UserWithoutPassword {
-	const { password, twoFactorSecretEncrypted, ...userWithoutPassword } = user;
-	void password;
-	void twoFactorSecretEncrypted;
-
-	return userWithoutPassword;
-}
-
-export function mapUserResponse(user: UserWithoutPassword): UserWithoutPasswordResponse {
-	return {
-		...user,
-		id: user.publicId,
-		imageInformation: null,
-	};
-}
+import type { SessionSchemaType } from '../../../database/types';
+import type { SessionResponse, SessionStatus } from './session.types';
 
 export function mapSessionResponse(
 	session: SessionSchemaType,

@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import type { Request } from 'express';
 import { UAParser } from 'ua-parser-js';
 
-import { notFoundError, unauthorizedError } from '../../core/errors/domain-error';
-import { sessionRenewalThreshold, sessionTimeout } from '../../core/helpers/constant.helpers';
-import type { SessionSchemaType } from '../../database/types';
-import type { SessionDataType, SessionListResponse } from './@types/auth.types';
-import { AuthSessionRepository } from './auth-session.repository';
-import { mapSessionResponse } from './auth.mapper';
-import type { SessionListQueryDto } from './auth.schema';
+import { notFoundError, unauthorizedError } from '../../../core/errors/domain-error';
+import { sessionRenewalThreshold, sessionTimeout } from '../../../core/helpers/constant.helpers';
+import type { SessionSchemaType } from '../../../database/types';
+import { mapSessionResponse } from './session.mapper';
+import { SessionRepository } from './session.repository';
+import type { SessionListQueryDto } from './session.schema';
+import type { SessionDataType, SessionListResponse } from './session.types';
 
 const clientUserAgentHeaders = [
 	'x-client-user-agent',
@@ -18,8 +18,8 @@ const clientUserAgentHeaders = [
 ] as const;
 
 @Injectable()
-export class AuthSession {
-	constructor(private readonly authSessionRepository: AuthSessionRepository) {}
+export class SessionService {
+	constructor(private readonly sessionRepository: SessionRepository) {}
 
 	getSessionInfo(request: Request) {
 		const rawUserAgent = this.getClientUserAgent(request);
@@ -33,15 +33,12 @@ export class AuthSession {
 		const browserVersion = this.getKnownValue(browser.version);
 		const osName = this.getKnownValue(os.name) ?? 'Unknown OS';
 		const osVersion = this.getKnownValue(os.version);
-		const hasParsedClient =
-			!!this.getKnownValue(browser.name) || !!this.getKnownValue(os.name);
-		const deviceType =
-			this.getKnownValue(device.type) ?? (hasParsedClient ? 'desktop' : 'Unknown');
+		const hasParsedClient = !!this.getKnownValue(browser.name) || !!this.getKnownValue(os.name);
+		const deviceType = this.getKnownValue(device.type) ?? (hasParsedClient ? 'desktop' : 'Unknown');
 
 		const deviceName = `${this.joinKnownValues(osName, osVersion, ' ')} - ${browserName}`;
 
-		const ipAddress =
-			this.getClientIpAddress(request) ?? request.socket.remoteAddress ?? 'Unknown';
+		const ipAddress = this.getClientIpAddress(request) ?? request.socket.remoteAddress ?? 'Unknown';
 
 		return {
 			userAgent: this.joinKnownValues(browserName, browserVersion, ' - '),
@@ -88,7 +85,7 @@ export class AuthSession {
 	}
 
 	async createSession(data: SessionDataType): Promise<string> {
-		const session = await this.authSessionRepository.createSession(data);
+		const session = await this.sessionRepository.createSession(data);
 
 		return session.token;
 	}
@@ -97,7 +94,7 @@ export class AuthSession {
 		userId: number,
 		sessionKeyOrId: string | number,
 	): Promise<SessionSchemaType> {
-		const session = await this.authSessionRepository.findSession(userId, sessionKeyOrId);
+		const session = await this.sessionRepository.findSession(userId, sessionKeyOrId);
 
 		if (!session) throw unauthorizedError('Invalid session token');
 
@@ -119,7 +116,7 @@ export class AuthSession {
 		sessionId: number,
 		expiresAt: Date = new Date(Date.now() + sessionTimeout),
 	): Promise<SessionSchemaType> {
-		const session = await this.authSessionRepository.extendSession(sessionId, expiresAt);
+		const session = await this.sessionRepository.extendSession(sessionId, expiresAt);
 
 		if (!session) throw unauthorizedError('Invalid session token');
 
@@ -127,7 +124,7 @@ export class AuthSession {
 	}
 
 	async markTwoFactorVerified(sessionId: number): Promise<SessionSchemaType> {
-		const session = await this.authSessionRepository.markTwoFactorVerified(sessionId);
+		const session = await this.sessionRepository.markTwoFactorVerified(sessionId);
 
 		if (!session) throw unauthorizedError('Invalid session token');
 
@@ -138,7 +135,7 @@ export class AuthSession {
 		sessionId: number,
 		data: Pick<Partial<SessionSchemaType>, 'twoFactorFailedAttempts' | 'twoFactorLockedUntil'>,
 	): Promise<SessionSchemaType> {
-		const session = await this.authSessionRepository.updateTwoFactorFailureState(sessionId, data);
+		const session = await this.sessionRepository.updateTwoFactorFailureState(sessionId, data);
 
 		if (!session) throw unauthorizedError('Invalid session token');
 
@@ -147,13 +144,13 @@ export class AuthSession {
 
 	async revokeSession(userId: number, sessionKeyOrId: string | number): Promise<boolean> {
 		await this.validateSession(userId, sessionKeyOrId);
-		await this.authSessionRepository.revokeSession(userId, sessionKeyOrId);
+		await this.sessionRepository.revokeSession(userId, sessionKeyOrId);
 
 		return true;
 	}
 
 	async revokeUserSession(userId: number, sessionPublicId: string): Promise<SessionSchemaType> {
-		const session = await this.authSessionRepository.revokeSessionByPublicIdForUser(
+		const session = await this.sessionRepository.revokeSessionByPublicIdForUser(
 			userId,
 			sessionPublicId,
 		);
@@ -164,15 +161,15 @@ export class AuthSession {
 	}
 
 	revokeOtherUserSessions(userId: number, currentSessionToken: string): Promise<number> {
-		return this.authSessionRepository.revokeOtherActiveUserSessions(userId, currentSessionToken);
+		return this.sessionRepository.revokeOtherActiveUserSessions(userId, currentSessionToken);
 	}
 
 	revokeAllUserSessions(userId: number): Promise<number> {
-		return this.authSessionRepository.revokeAllUserSessions(userId);
+		return this.sessionRepository.revokeAllUserSessions(userId);
 	}
 
 	listOfUserSessions(userId: number): Promise<SessionSchemaType[]> {
-		return this.authSessionRepository.listUserSessions(userId);
+		return this.sessionRepository.listUserSessions(userId);
 	}
 
 	async listUserSessions(
@@ -180,7 +177,7 @@ export class AuthSession {
 		query: SessionListQueryDto,
 		currentSessionToken: string,
 	): Promise<SessionListResponse> {
-		const result = await this.authSessionRepository.listUserSessionsPaginated(
+		const result = await this.sessionRepository.listUserSessionsPaginated(
 			userId,
 			query,
 			currentSessionToken,

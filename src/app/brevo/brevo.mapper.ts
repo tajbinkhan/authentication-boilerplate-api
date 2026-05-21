@@ -29,25 +29,3 @@ export interface BrevoTemplateEmailDto {
 	replyTo?: BrevoReplyTo;
 	headers?: Record<string, string>;
 }
-
-export interface BrevoEmailPayload extends BrevoRawEmailDto {
-	sender: BrevoSender;
-}
-
-export function buildBrevoEmailPayload(
-	email: BrevoRawEmailDto,
-	sender: BrevoSender,
-): BrevoEmailPayload {
-	return {
-		...email,
-		sender,
-	};
-}
-
-export function buildBrevoHttpHeaders(apiKey: string): Record<string, string> {
-	return {
-		'api-key': apiKey,
-		'content-type': 'application/json',
-		accept: 'application/json',
-	};
-}

@@ -2,11 +2,11 @@ import { Inject, Injectable } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
-import { DATABASE_CONNECTION } from '../../database/connection';
-import schema from '../../database/schema';
-import type { AccountSchemaType, UserSchemaType } from '../../database/types';
-import type { CreateUser } from './@types/auth.types';
+import { DATABASE_CONNECTION } from '../../../database/connection';
+import schema from '../../../database/schema';
+import type { AccountSchemaType, UserSchemaType } from '../../../database/types';
 import type { UpdateProfileDto } from './auth.schema';
+import type { CreateUser } from './auth.types';
 
 export type AuthDatabase = NodePgDatabase<typeof schema>;
 export type AuthTransaction = Parameters<Parameters<AuthDatabase['transaction']>[0]>[0];

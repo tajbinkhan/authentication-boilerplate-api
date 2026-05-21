@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 
 import { conflictError, isDatabaseUniqueViolation, notFoundError } from '../../core/errors/domain-error';
-import type { UserWithoutPassword } from '../auth/@types/auth.types';
-import { AuthTwoFactorService } from '../auth/auth-two-factor.service';
+import type { UserWithoutPassword } from '../auth/core/auth.types';
+import { TwoFactorService } from '../auth/two-factor/two-factor.service';
 import type {
 	DeleteUserResponse,
 	RevokeUserSessionsResponse,
@@ -25,7 +25,7 @@ import type {
 export class UsersService {
 	constructor(
 		private readonly usersRepository: UsersRepository,
-		private readonly authTwoFactorService: AuthTwoFactorService,
+		private readonly twoFactorService: TwoFactorService,
 	) {}
 
 	async listUsers(query: UsersListQueryDto): Promise<UserListResponse> {
@@ -147,7 +147,7 @@ export class UsersService {
 
 		UsersPolicy.assertCanManageUser(currentUser, targetUser);
 
-		return this.authTwoFactorService.resetUserTwoFactor(targetUser.id);
+		return this.twoFactorService.resetUserTwoFactor(targetUser.id);
 	}
 
 	private async getTargetUser(publicId: string) {

@@ -6,25 +6,28 @@ import type { UploadApiResponse } from 'cloudinary';
 import { randomBytes } from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
 
-import { badRequestError, notFoundError, unauthorizedError } from '../../core/errors/domain-error';
-import { magicLinkTimeout, sessionTimeout } from '../../core/helpers/constant.helpers';
-import { EnvType } from '../../core/validators/env';
-import { CryptoService } from '../../crypto/crypto.service';
-import type { UserSchemaType } from '../../database/types';
-import { CloudinaryImageService } from '../media/services/cloudinary.service';
+import {
+	badRequestError,
+	notFoundError,
+	unauthorizedError,
+} from '../../../core/errors/domain-error';
+import { magicLinkTimeout, sessionTimeout } from '../../../core/helpers/constant.helpers';
+import { EnvType } from '../../../core/validators/env';
+import { CryptoService } from '../../../crypto/crypto.service';
+import { CloudinaryImageService } from '../../media/services/cloudinary.service';
+import { MagicLinkEmailService } from '../services/magic-link-email.service';
+import { SessionService } from '../session/session.service';
+import { stripUserPassword } from './auth.mapper';
+import { AUTH_CLOUDINARY_SERVICE } from './auth.providers';
+import { AuthRepository, type AuthDbClient } from './auth.repository';
+import type { LoginDto, UpdateProfileDto } from './auth.schema';
 import type {
 	CreateUser,
 	MagicLinkSessionInfo,
 	UserInformation,
 	UserWithoutPassword,
 	VerifiedGoogleProfile,
-} from './@types/auth.types';
-import { stripUserPassword } from './auth.mapper';
-import { AUTH_CLOUDINARY_SERVICE } from './auth.providers';
-import { AuthRepository, type AuthDbClient } from './auth.repository';
-import type { LoginDto, UpdateProfileDto } from './auth.schema';
-import { AuthSession } from './auth.session';
-import { MagicLinkEmailService } from './services/magic-link-email.service';
+} from './auth.types';
 
 @Injectable()
 export class AuthService {
@@ -33,7 +36,7 @@ export class AuthService {
 	constructor(
 		private readonly authRepository: AuthRepository,
 		private readonly jwtService: JwtService,
-		private readonly authSession: AuthSession,
+		private readonly sessionService: SessionService,
 		private readonly cryptoService: CryptoService,
 		private readonly magicLinkEmailService: MagicLinkEmailService,
 		@Inject(AUTH_CLOUDINARY_SERVICE)
@@ -48,7 +51,7 @@ export class AuthService {
 		const payload = { sub, email };
 		const token = this.jwtService.sign(payload);
 
-		return this.authSession.createSession({
+		return this.sessionService.createSession({
 			userId: userInfo.userId,
 			expiresAt: userInfo.expirationTime
 				? new Date(userInfo.expirationTime)
