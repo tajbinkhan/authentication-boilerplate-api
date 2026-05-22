@@ -99,8 +99,9 @@ kept as a browser fallback; the primary frontend flow uses the JSON verification
 ### How It Works
 
 The token is hashed and matched against the stored verification. If valid and unexpired, the user is
-created or marked verified as needed, the verification token is removed, a session token is created,
-and the `access-token` cookie is set before redirecting to the frontend success page.
+created or marked verified as needed, the verification token is removed, dashboard access is checked,
+a session token is created, and the `access-token` cookie is set before redirecting to the frontend
+success page.
 
 ### Authentication
 
@@ -137,6 +138,19 @@ This route returns a redirect, not JSON.
 - Redirects to `${APP_URL}/auth/magic-link/success`, preserving the safe `redirect` query when
   present.
 
+### Dashboard Restriction Redirect
+
+When the magic link is valid but the user cannot access the dashboard, no session cookie is issued.
+Any existing `access-token` cookie is cleared, and the user is redirected to the login page with a
+machine-readable `error` and human-readable `message` query parameter:
+
+`/login?error=account_pending_approval&message=Your%20account%20is%20pending%20approval%20by%20an%20administrator.`
+
+Possible restriction codes:
+
+- `account_pending_approval`: the account exists but is waiting for administrator approval.
+- `dashboard_role_not_allowed`: the account role is not included in system `allowedRoles`.
+
 ### Error Responses
 
 - `422 validation_failed` when query parameters fail validation.
@@ -168,8 +182,9 @@ user.
 
 ### How It Works
 
-The token is validated the same way as the redirect route. On success, a session token is created,
-the `access-token` cookie is set, and the user is returned in the standard API envelope.
+The token is validated the same way as the redirect route. On success, dashboard access is checked, a
+session token is created, the `access-token` cookie is set, and the user is returned in the standard
+API envelope.
 
 ### Authentication
 
@@ -232,7 +247,9 @@ JSON body:
 
 - `403 csrf_invalid` when the CSRF token is missing or invalid.
 - `422 validation_failed` when the request body fails validation.
-- `401 unauthorized` when the token is invalid, expired, or already used.
+- `401 unauthorized` when the token is invalid, expired, already used, or the verified account is
+  restricted from dashboard access. Restricted dashboard access responses include
+  `meta.reason` as `account_pending_approval` or `dashboard_role_not_allowed`.
 
 ### Example Error Response
 
@@ -343,8 +360,8 @@ Authenticates a user with a Google ID token.
 ### How It Works
 
 The Google credential is verified against `GOOGLE_CLIENT_ID`. The service links the Google account
-to an existing user by email or creates a new user, creates a session, sets the `access-token`
-cookie, and returns the user.
+to an existing user by email or creates a new user, checks dashboard access, creates a session, sets
+the `access-token` cookie, and returns the user.
 
 ### Authentication
 
@@ -403,6 +420,8 @@ None.
 - `403 csrf_invalid` when the CSRF token is missing or invalid.
 - `422 validation_failed` when the request body fails validation.
 - `401 unauthorized` when the Google credential is invalid or the Google email is unverified.
+- `401 unauthorized` when the account is restricted from dashboard access. The response includes
+  `meta.reason` as `account_pending_approval` or `dashboard_role_not_allowed`.
 
 ### Example Error Response
 

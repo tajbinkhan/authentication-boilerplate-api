@@ -2,6 +2,18 @@ import type { UserSchemaType } from '../../../database/types';
 
 export type UserWithoutPassword = Omit<UserSchemaType, 'password' | 'twoFactorSecretEncrypted'>;
 
+export const dashboardAccessRestrictionCodes = [
+	'account_pending_approval',
+	'dashboard_role_not_allowed',
+] as const;
+
+export type DashboardAccessRestrictionCode = (typeof dashboardAccessRestrictionCodes)[number];
+
+export interface DashboardAccessRestriction {
+	code: DashboardAccessRestrictionCode;
+	message: string;
+}
+
 export type CreateUser = Omit<
 	UserSchemaType,
 	| 'id'

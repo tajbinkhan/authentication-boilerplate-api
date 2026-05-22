@@ -99,17 +99,30 @@ export class AuthController {
 		@Res() response: Response,
 	): Promise<void> {
 		const userDeviceInfo = this.sessionService.getSessionInfo(request);
-		const result = await this.authService.verifyMagicLink(verifyDto, userDeviceInfo);
 
-		response.cookie(
-			'access-token',
-			result.sessionToken,
-			AppHelpers.accessTokenCookieConfig(this.configService),
-		);
+		try {
+			const result = await this.authService.verifyMagicLink(verifyDto, userDeviceInfo);
 
-		response.redirect(
-			this.authService.getMagicLinkRedirectUrl(verifyDto.redirectUrl ?? verifyDto.redirect),
-		);
+			response.cookie(
+				'access-token',
+				result.sessionToken,
+				AppHelpers.accessTokenCookieConfig(this.configService),
+			);
+
+			response.redirect(
+				this.authService.getMagicLinkRedirectUrl(verifyDto.redirectUrl ?? verifyDto.redirect),
+			);
+		} catch (error) {
+			const restriction = this.authService.getDashboardAccessRestrictionFromError(error);
+
+			if (!restriction) throw error;
+
+			response.clearCookie(
+				'access-token',
+				AppHelpers.accessTokenClearCookieConfig(this.configService),
+			);
+			response.redirect(this.authService.getDashboardAccessRestrictionLoginUrl(restriction));
+		}
 	}
 
 	@Post('magic-link/verify')
@@ -369,6 +382,8 @@ export class AuthController {
 		const googleProfile = await this.authService.verifyGoogleCredential(googleLoginDto.credential);
 		const user = await this.authService.findOrCreateGoogleUser(googleProfile);
 		const userDeviceInfo = this.sessionService.getSessionInfo(request);
+
+		await this.authService.assertCanAccessDashboard(user);
 
 		const accessToken = await this.authService.generateAccessToken({
 			userId: user.id,
