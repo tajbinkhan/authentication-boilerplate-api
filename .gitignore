@@ -66,3 +66,4 @@ routes.json
 # Vercel
 .vercel
 .env*.local
+.env*
