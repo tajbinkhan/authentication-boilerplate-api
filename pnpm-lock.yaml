@@ -32,6 +32,18 @@ importers:
       '@nestjs/platform-express':
         specifier: ^11.1.23
         version: 11.1.23(@nestjs/common@11.1.23(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.23)
+      '@otplib/core':
+        specifier: 13.4.0
+        version: 13.4.0
+      '@otplib/plugin-base32-scure':
+        specifier: 13.4.0
+        version: 13.4.0
+      '@otplib/totp':
+        specifier: 13.4.0
+        version: 13.4.0
+      '@otplib/uri':
+        specifier: 13.4.0
+        version: 13.4.0
       '@trivago/prettier-plugin-sort-imports':
         specifier: ^6.0.2
         version: 6.0.2(prettier@3.8.3)
@@ -80,9 +92,6 @@ importers:
       multer:
         specifier: ^2.1.1
         version: 2.1.1
-      otplib:
-        specifier: ^13.4.0
-        version: 13.4.0
       passport:
         specifier: ^0.7.0
         version: 0.7.0
@@ -1004,10 +1013,6 @@ packages:
       prettier:
         optional: true
 
-  '@noble/hashes@2.2.0':
-    resolution: {integrity: sha512-IYqDGiTXab6FniAgnSdZwgWbomxpy9FtYvLKs7wCUs2a8RkITG+DFGO1DM9cr+E3/RgADRpFjrKVaJ1z6sjtEg==}
-    engines: {node: '>= 20.19.0'}
-
   '@nuxt/opencollective@0.4.1':
     resolution: {integrity: sha512-GXD3wy50qYbxCJ652bDrDzgMr3NFEkIS374+IgFQKkCvk9yiYcLvX2XDYr7UyQxf4wK0e+yqDYRubZ0DtOxnmQ==}
     engines: {node: ^14.18.0 || >=16.10.0, npm: '>=5.10.0'}
@@ -1021,9 +1026,6 @@ packages:
 
   '@otplib/plugin-base32-scure@13.4.0':
     resolution: {integrity: sha512-/t9YWJmMbB8bF5z8mXrBZc2FXBe8B/3hG5FhWr9K8cFwFhyxScbPysmZe8s1UTzSA6N+s8Uv8aIfCtVXPNjJWw==}
-
-  '@otplib/plugin-crypto-noble@13.4.0':
-    resolution: {integrity: sha512-KrvE4m7Zv+TT1944HzgqFJWJpKb6AyoxDbvhPStmBqdMlv5Gekb80d66cuFRL08kkPgJ5gXUSb5SFpYeB+bACg==}
 
   '@otplib/totp@13.4.0':
     resolution: {integrity: sha512-dK+vl0f0ekzf6mCENRI9AKS2NJUC7OjI3+X8e7QSnhQ2WM7I+i4PGpb3QxKi5hxjTtwVuoZwXR2CFtXdcRtNdQ==}
@@ -2430,9 +2432,6 @@ packages:
     resolution: {integrity: sha512-5b6Y85tPxZZ7QytO+BQzysW31HJku27cRIlkbAXaNx+BdcVi+LlRFmVXzeF6a7JCwJpyw5c4b+YSVImQIrBpuQ==}
     engines: {node: '>=10'}
 
-  otplib@13.4.0:
-    resolution: {integrity: sha512-RUcYcRMCgRWhUE/XabRppXpUwCwaWBNHe5iPXhdvP8wwDGpGpsIf/kxX/ec3zFsOaM1Oq8lEhUqDwk6W7DHkwg==}
-
   p-limit@2.3.0:
     resolution: {integrity: sha512-//88mFWSJx8lxCzwdAABTJL2MyWB12+eIY7MDL2SqLmAkeKU9qxRvWuSyTjm3FUmpBEMuFfckAIqEaVGUDxb6w==}
     engines: {node: '>=6'}
@@ -3716,8 +3715,6 @@ snapshots:
     transitivePeerDependencies:
       - chokidar
 
-  '@noble/hashes@2.2.0': {}
-
   '@nuxt/opencollective@0.4.1':
     dependencies:
       consola: 3.4.2
@@ -3733,11 +3730,6 @@ snapshots:
     dependencies:
       '@otplib/core': 13.4.0
       '@scure/base': 1.2.6
-
-  '@otplib/plugin-crypto-noble@13.4.0':
-    dependencies:
-      '@noble/hashes': 2.2.0
-      '@otplib/core': 13.4.0
 
   '@otplib/totp@13.4.0':
     dependencies:
@@ -5175,15 +5167,6 @@ snapshots:
       log-symbols: 4.1.0
       strip-ansi: 6.0.1
       wcwidth: 1.0.1
-
-  otplib@13.4.0:
-    dependencies:
-      '@otplib/core': 13.4.0
-      '@otplib/hotp': 13.4.0
-      '@otplib/plugin-base32-scure': 13.4.0
-      '@otplib/plugin-crypto-noble': 13.4.0
-      '@otplib/totp': 13.4.0
-      '@otplib/uri': 13.4.0
 
   p-limit@2.3.0:
     dependencies:

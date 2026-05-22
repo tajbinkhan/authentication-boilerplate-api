@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { randomBytes } from 'crypto';
-import { generateSecret, generateURI, verifySync } from 'otplib';
+import { createHmac, randomBytes, timingSafeEqual } from 'crypto';
+import { generateSecret, type CryptoPlugin } from '@otplib/core';
+import { base32 } from '@otplib/plugin-base32-scure';
+import { verifySync } from '@otplib/totp';
+import { generateTOTP } from '@otplib/uri';
 import QRCode from 'qrcode';
 
 import {
@@ -28,6 +31,23 @@ const setupExpiresMs = 10 * 60 * 1000;
 const recoveryCodeCount = 10;
 const twoFactorMaxAttempts = 5;
 const twoFactorLockMs = 10 * 60 * 1000;
+const twoFactorPeriodSeconds = 30;
+
+const nodeOtpCrypto: CryptoPlugin = {
+	name: 'node',
+	hmac(algorithm, key, data) {
+		return createHmac(algorithm, Buffer.from(key)).update(Buffer.from(data)).digest();
+	},
+	randomBytes(length) {
+		return randomBytes(length);
+	},
+	constantTimeEqual(a, b) {
+		const left = Buffer.from(a);
+		const right = Buffer.from(b);
+
+		return left.length === right.length && timingSafeEqual(left, right);
+	},
+};
 
 @Injectable()
 export class TwoFactorService {
@@ -54,16 +74,15 @@ export class TwoFactorService {
 			throw badRequestError('Two-factor authentication is already enabled.');
 		}
 
-		const secret = generateSecret();
+		const secret = generateSecret({ crypto: nodeOtpCrypto, base32 });
 		const secretEncrypted = this.cryptoService.encrypt(secret);
 		const expiresAt = new Date(Date.now() + setupExpiresMs);
 		const issuer = this.getIssuer();
-		const otpauthUrl = generateURI({
+		const otpauthUrl = generateTOTP({
 			issuer,
 			label: user.email,
 			secret,
-			strategy: 'totp',
-			period: 30,
+			period: twoFactorPeriodSeconds,
 		});
 
 		await this.twoFactorRepository.replaceSetup({
@@ -253,9 +272,10 @@ export class TwoFactorService {
 			return verifySync({
 				secret,
 				token: code.replace(/\s/g, ''),
-				strategy: 'totp',
-				period: 30,
-				epochTolerance: 30,
+				period: twoFactorPeriodSeconds,
+				epochTolerance: twoFactorPeriodSeconds,
+				crypto: nodeOtpCrypto,
+				base32,
 			}).valid;
 		} catch {
 			return false;
