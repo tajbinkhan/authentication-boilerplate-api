@@ -1,3 +1,4 @@
+import { randomInt } from 'crypto';
 import type { ConfigService } from '@nestjs/config';
 import type { CookieOptions } from 'express';
 import { sessionTimeout } from './constant.helpers';
@@ -33,7 +34,7 @@ export default class AppHelpers {
 
 		const min = Math.pow(10, length - 1);
 		const max = Math.pow(10, length) - 1;
-		return Math.floor(Math.random() * (max - min + 1) + min);
+		return randomInt(min, max + 1);
 	}
 
 	/**

@@ -20,7 +20,7 @@ export const googleLoginSchema = z
 	.strict();
 
 const magicLinkRedirectSchema = z.preprocess(value => {
-	if (Array.isArray(value)) return value[0];
+	if (Array.isArray(value)) return value[0] as unknown;
 	if (typeof value !== 'string') return undefined;
 
 	const trimmed = value.trim();

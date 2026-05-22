@@ -277,19 +277,24 @@ export class AuthService {
 		let imageInformation: UploadApiResponse | null | undefined = null;
 
 		if (data.image) {
-			const uploadResult = await this.cloudinaryImageService.uploadFromGoogleUrl(data.image, {
-				folder: 'user_profiles',
-				transformation: {
-					quality: 'auto',
-					format: 'webp',
-					width: 500,
-					height: 500,
-					crop: 'fill',
-				},
-			});
+			if (this.configService.get('CLOUDINARY_ENABLED') === 'true') {
+				const uploadResult = await this.cloudinaryImageService.uploadFromGoogleUrl(data.image, {
+					folder: 'user_profiles',
+					transformation: {
+						quality: 'auto',
+						format: 'webp',
+						width: 500,
+						height: 500,
+						crop: 'fill',
+					},
+				});
 
-			imageUrl = String(uploadResult.data?.secure_url);
-			imageInformation = uploadResult.data;
+				imageUrl = String(uploadResult.data?.secure_url);
+				imageInformation = uploadResult.data;
+			} else {
+				imageUrl = data.image;
+				imageInformation = null;
+			}
 		}
 
 		const newUser = await this.authRepository.createUser({
@@ -315,6 +320,10 @@ export class AuthService {
 		userId: number,
 		file: Express.Multer.File,
 	): Promise<UserWithoutPassword> {
+		if (this.configService.get('CLOUDINARY_ENABLED') !== 'true') {
+			throw badRequestError('Profile image upload is disabled because Cloudinary is not configured.');
+		}
+
 		const result = await this.cloudinaryImageService.uploadWithFaceDetection(file.buffer, {
 			size: 200,
 			gravity: 'face:auto',
@@ -336,6 +345,9 @@ export class AuthService {
 	}
 
 	async verifyGoogleCredential(credential: string): Promise<VerifiedGoogleProfile> {
+		if (this.configService.get('GOOGLE_LOGIN_ENABLED') !== 'true') {
+			throw unauthorizedError('Google login is disabled.');
+		}
 		try {
 			const ticket = await this.googleAuthClient.verifyIdToken({
 				idToken: credential,

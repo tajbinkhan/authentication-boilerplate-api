@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { notFoundError, unprocessableError } from '../../core/errors/domain-error';
+import { PaginatedResponse } from '../../core/interceptors/api-response.interceptor';
 import type { MediaDataType, MediaResponseType } from './@types/media.types';
 import {
 	mapMediaDeleteResponse,
@@ -10,7 +11,7 @@ import {
 import { MEDIA_CLOUDINARY_SERVICE } from './media.providers';
 import { MediaPolicy } from './media.policy';
 import { MediaRepository } from './media.repository';
-import type { MediaDto } from './media.schema';
+import { type MediaDto, type MediaListQueryDto } from './media.schema';
 import { CloudinaryImageService } from './services/cloudinary.service';
 
 @Injectable()
@@ -42,10 +43,30 @@ export class MediaService {
 		return !!createdMedia;
 	}
 
-	async getAllMedia(userId: number): Promise<MediaResponseType[]> {
-		const mediaItems = await this.mediaRepository.listByUserId(userId);
+	async getAllMedia(
+		userId: number,
+		query: MediaListQueryDto,
+	): Promise<PaginatedResponse<MediaResponseType>> {
+		const { rows, total } = await this.mediaRepository.listByUserIdPaginated(userId, query);
 
-		return mediaItems.map(mapMediaResponse);
+		const page = query.page ?? 1;
+		const pageSize = query.pageSize ?? 10;
+		const totalPages = Math.ceil(total / pageSize);
+
+		return {
+			data: rows.map(mapMediaResponse),
+			pagination: {
+				totalItems: total,
+				limit: pageSize,
+				offset: (page - 1) * pageSize,
+				currentPage: page,
+				totalPages,
+				hasPrevPage: page > 1,
+				hasNextPage: page < totalPages,
+				prevPage: page > 1 ? page - 1 : null,
+				nextPage: page < totalPages ? page + 1 : null,
+			},
+		};
 	}
 
 	async getMediaByPublicId(userId: number, publicId: string): Promise<MediaResponseType> {

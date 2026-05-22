@@ -17,6 +17,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Throttle } from '@nestjs/throttler';
 import type { Request as ExpressRequest, Response } from 'express';
 import { memoryStorage } from 'multer';
 
@@ -78,6 +79,10 @@ export class AuthController {
 		private readonly configService: ConfigService<EnvType, true>,
 	) {}
 
+	@Throttle({
+		short: { limit: 1, ttl: 60000 },
+		long: { limit: 5, ttl: 300000 },
+	})
 	@Post('magic-link/request')
 	@HttpCode(HttpStatus.OK)
 	async requestMagicLink(
@@ -189,6 +194,10 @@ export class AuthController {
 	}
 
 	@UseGuards(JwtAuthGuard)
+	@Throttle({
+		short: { limit: 3, ttl: 60000 },
+		long: { limit: 10, ttl: 300000 },
+	})
 	@Post('2fa/setup/confirm')
 	@HttpCode(HttpStatus.OK)
 	async confirmTwoFactorSetup(
@@ -203,6 +212,10 @@ export class AuthController {
 	}
 
 	@UseGuards(PartialJwtAuthGuard)
+	@Throttle({
+		short: { limit: 3, ttl: 60000 },
+		long: { limit: 10, ttl: 300000 },
+	})
 	@Post('2fa/verify')
 	@HttpCode(HttpStatus.OK)
 	async verifyTwoFactor(
@@ -220,6 +233,10 @@ export class AuthController {
 	}
 
 	@UseGuards(JwtAuthGuard)
+	@Throttle({
+		short: { limit: 3, ttl: 60000 },
+		long: { limit: 10, ttl: 300000 },
+	})
 	@Post('2fa/disable')
 	@HttpCode(HttpStatus.OK)
 	async disableTwoFactor(
@@ -240,6 +257,10 @@ export class AuthController {
 	}
 
 	@UseGuards(JwtAuthGuard)
+	@Throttle({
+		short: { limit: 3, ttl: 60000 },
+		long: { limit: 10, ttl: 300000 },
+	})
 	@Post('2fa/recovery-codes/regenerate')
 	@HttpCode(HttpStatus.OK)
 	async regenerateTwoFactorRecoveryCodes(

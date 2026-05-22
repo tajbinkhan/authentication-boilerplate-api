@@ -9,6 +9,7 @@ import {
 	ParseUUIDPipe,
 	Post,
 	Put,
+	Query,
 	UploadedFile,
 	UseGuards,
 	UseInterceptors,
@@ -23,7 +24,7 @@ import type { UserWithoutPassword } from '../auth/core/auth.types';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { MediaResponseType } from './@types/media.types';
 import { FILE_SIZE_LIMIT, singleFileSchema, ZodFileValidationPipe } from './media.pipe';
-import { type MediaDto, mediaSchema } from './media.schema';
+import { type MediaDto, mediaSchema, type MediaListQueryDto, mediaListQuerySchema } from './media.schema';
 import { MediaService } from './media.service';
 
 @Controller('media')
@@ -54,10 +55,11 @@ export class MediaController {
 	@Get('/')
 	async getAllMedia(
 		@CurrentUser() user: UserWithoutPassword,
+		@Query(new ZodValidationPipe(mediaListQuerySchema)) query: MediaListQueryDto,
 	): Promise<ApiResponse<MediaResponseType[]>> {
-		const mediaItems = await this.mediaService.getAllMedia(user.id);
+		const { data, pagination } = await this.mediaService.getAllMedia(user.id, query);
 
-		return createApiResponse(HttpStatus.OK, 'Media fetched successfully', mediaItems);
+		return createApiResponse(HttpStatus.OK, 'Media fetched successfully', data, pagination);
 	}
 
 	@UseGuards(JwtAuthGuard)

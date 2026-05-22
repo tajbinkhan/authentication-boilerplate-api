@@ -37,31 +37,23 @@ export function displayStartupInfo(port: number | string): void {
 }
 
 export function appLogger(req: Request, res: Response, next: NextFunction) {
-	{
-		const { method, originalUrl } = req;
-		const startTime = Date.now();
-		const incomingRequestId = req.headers['x-request-id'];
-		const requestId = Array.isArray(incomingRequestId)
-			? incomingRequestId[0]
-			: incomingRequestId || randomUUID();
+	const { method, originalUrl } = req;
+	const startTime = Date.now();
+	const requestId = req.requestId || randomUUID();
 
-		req.requestId = requestId;
-		res.setHeader('x-request-id', requestId);
+	res.on('finish', () => {
+		const duration = Date.now() - startTime;
+		const statusCode = res.statusCode;
+		const logger = new Logger('HTTP');
 
-		res.on('finish', () => {
-			const duration = Date.now() - startTime;
-			const statusCode = res.statusCode;
-			const logger = new Logger('HTTP');
+		// Color coding based on status code
+		const statusColor = statusCode >= 500 ? '31' : statusCode >= 400 ? '33' : '32';
+		const methodColor = '36'; // Cyan for method
 
-			// Color coding based on status code
-			const statusColor = statusCode >= 500 ? '31' : statusCode >= 400 ? '33' : '32';
-			const methodColor = '36'; // Cyan for method
+		logger.log(
+			`\x1b[${methodColor}m${method}\x1b[0m ${originalUrl} \x1b[${statusColor}m${statusCode}\x1b[0m - ${duration}ms requestId=${requestId}`,
+		);
+	});
 
-			logger.log(
-				`\x1b[${methodColor}m${method}\x1b[0m ${originalUrl} \x1b[${statusColor}m${statusCode}\x1b[0m - ${duration}ms requestId=${requestId}`,
-			);
-		});
-
-		next();
-	}
+	next();
 }

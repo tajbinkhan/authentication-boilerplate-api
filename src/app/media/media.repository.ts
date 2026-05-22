@@ -1,12 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, eq } from 'drizzle-orm';
+import { and, count, desc, eq, gte, ilike, lte, or, type SQL } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 import { DATABASE_CONNECTION } from '../../database/connection';
+import { orderByColumn } from '../../database/helpers';
 import schema from '../../database/schema';
 import type { MediaSchemaType } from '../../database/types';
 import type { MediaDataType } from './@types/media.types';
-import type { MediaDto } from './media.schema';
+import { type MediaDto, type MediaListQueryDto } from './media.schema';
 import type { MediaDeleteRow, MediaResponseRow } from './media.mapper';
 
 export type MediaDatabase = NodePgDatabase<typeof schema>;
@@ -32,6 +33,61 @@ export class MediaRepository {
 			.from(schema.media)
 			.where(eq(schema.media.uploadedBy, userId))
 			.orderBy(schema.media.createdAt);
+	}
+
+	async listByUserIdPaginated(
+		userId: number,
+		query: MediaListQueryDto,
+	): Promise<{ rows: MediaResponseRow[]; total: number }> {
+		const page = query.page ?? 1;
+		const pageSize = query.pageSize ?? 10;
+		const offset = (page - 1) * pageSize;
+
+		const conditions = [
+			eq(schema.media.uploadedBy, userId),
+		] as SQL<unknown>[];
+
+		if (query.search) {
+			conditions.push(
+				or(
+					ilike(schema.media.filename, `%${query.search}%`),
+					ilike(schema.media.altText, `%${query.search}%`),
+				)!,
+			);
+		}
+
+		if (query.mediaType) {
+			conditions.push(eq(schema.media.mediaType, query.mediaType));
+		}
+
+		if (query.fromDate) {
+			conditions.push(gte(schema.media.createdAt, new Date(query.fromDate)));
+		}
+
+		if (query.toDate) {
+			const toDate = new Date(query.toDate);
+			toDate.setHours(23, 59, 59, 999);
+			conditions.push(lte(schema.media.createdAt, toDate));
+		}
+
+		const whereClause = and(...conditions);
+		const orderBy = orderByColumn(schema.media, query.sort, query.dir) ?? desc(schema.media.createdAt);
+
+		const [rows, totalRows] = await Promise.all([
+			this.db
+				.select(this.mediaResponseSelection())
+				.from(schema.media)
+				.where(whereClause)
+				.orderBy(orderBy)
+				.limit(pageSize)
+				.offset(offset),
+			this.db.select({ value: count() }).from(schema.media).where(whereClause),
+		]);
+
+		return {
+			rows,
+			total: Number(totalRows[0]?.value ?? 0),
+		};
 	}
 
 	async findByPublicIdForUser(

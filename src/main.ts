@@ -9,6 +9,7 @@ import { HttpExceptionFilter } from './core/filters/http-exception.filter';
 import { ApiResponseInterceptor } from './core/interceptors/api-response.interceptor';
 import { appLogger, displayStartupInfo } from './core/logging/app.logger';
 import { logAllRoutes } from './core/logging/route.logger';
+import { requestIdMiddleware } from './core/middlewares/request-id.middleware';
 import { EnvType } from './core/validators/env';
 
 async function bootstrap() {
@@ -33,10 +34,13 @@ async function bootstrap() {
 			}
 		},
 		credentials: true,
-		methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+		methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
 		allowedHeaders: ['Content-Type', 'Authorization', 'x-csrf-token', 'ngrok-skip-browser-warning'],
 		maxAge: 3600,
 	});
+
+	// Apply request ID middleware
+	app.use(requestIdMiddleware);
 
 	// Enable cookie parsing for CSRF tokens
 	app.use(cookieParser());

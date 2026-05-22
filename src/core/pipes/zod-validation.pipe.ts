@@ -1,14 +1,31 @@
-import { Injectable, PipeTransform } from '@nestjs/common';
+import { ArgumentMetadata, Inject, Injectable, Optional, PipeTransform } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { z } from 'zod';
 
 import { validationFailed } from '../errors/domain-error';
 
 @Injectable()
-export class ZodValidationPipe<TSchema extends z.ZodTypeAny> implements PipeTransform {
-	constructor(private readonly schema: TSchema) {}
+export class ZodValidationPipe implements PipeTransform {
+	constructor(
+		@Optional() private readonly schema?: z.ZodTypeAny,
+		@Optional() @Inject(Reflector) private readonly reflector?: Reflector,
+	) {}
 
-	transform(value: unknown): z.infer<TSchema> {
-		const parsed = this.schema.safeParse(value);
+	transform(value: unknown, metadata: ArgumentMetadata): unknown {
+		// 1. Use constructor-supplied schema first (for manual parameter decorator instantiation)
+		let schemaToUse = this.schema;
+
+		// 2. Fallback: retrieve static schema from the parameter metatype (DTO class)
+		if (!schemaToUse && metadata.metatype) {
+			schemaToUse = (metadata.metatype as any).schema;
+		}
+
+		// If no schema could be resolved, bypass validation
+		if (!schemaToUse) {
+			return value;
+		}
+
+		const parsed = schemaToUse.safeParse(value);
 
 		if (!parsed.success) {
 			const message =
