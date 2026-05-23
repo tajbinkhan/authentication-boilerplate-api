@@ -10,7 +10,7 @@ import {
 import { AuditLogRepository } from './audit-log.repository';
 import type { AuditLogListQueryDto } from './audit-log.schema';
 
-type AuditActor = Pick<UserWithoutPassword, 'id' | 'role'>;
+type AuditActor = Pick<UserWithoutPassword, 'id' | 'role' | 'name' | 'email'>;
 
 export interface LogAuditActionParams {
 	actor?: AuditActor | null;
@@ -53,10 +53,14 @@ export class AuditLogService {
 			const context = this.getRequestContext(params.request);
 			const actorId = params.actor ? params.actor.id : (params.actorId ?? null);
 			const actorRole = params.actor ? params.actor.role : (params.actorRole ?? null);
+			const actorName = params.actor ? params.actor.name : null;
+			const actorEmail = params.actor ? params.actor.email : null;
 
 			await this.auditLogRepository.create({
 				actorId,
 				actorRole,
+				actorName,
+				actorEmail,
 				action: params.action,
 				targetType: params.targetType,
 				targetId: params.targetId,

@@ -4,6 +4,8 @@ export interface AuditLogRow {
 	publicId: string;
 	actorPublicId: string | null;
 	actorRole: RoleTypeEnum | null;
+	actorName: string | null;
+	actorEmail: string | null;
 	action: string;
 	targetType: string;
 	targetId: string;
@@ -18,6 +20,8 @@ export interface AuditLogResponse {
 	id: string;
 	actorId: string | null;
 	actorRole: RoleTypeEnum | null;
+	actorName: string | null;
+	actorEmail: string | null;
 	action: string;
 	targetType: string;
 	targetId: string;
@@ -40,6 +44,8 @@ export function mapAuditLogResponse(row: AuditLogRow): AuditLogResponse {
 		id: row.publicId,
 		actorId: row.actorPublicId,
 		actorRole: row.actorRole,
+		actorName: row.actorName,
+		actorEmail: row.actorEmail,
 		action: row.action,
 		targetType: row.targetType,
 		targetId: row.targetId,

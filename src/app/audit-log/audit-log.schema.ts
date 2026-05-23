@@ -14,6 +14,7 @@ const AUDIT_LOG_SORTABLE_FIELDS: readonly SortableField[] = [
 
 export const auditLogListQuerySchema = baseQuerySchema(AUDIT_LOG_SORTABLE_FIELDS).safeExtend({
 	actorId: validateUUID('Actor ID').optional(),
+	actor: validateString('Actor', { max: 255 }).optional(),
 	action: validateString('Action', { max: 100 }).optional(),
 	targetType: validateString('Target Type', { max: 50 }).optional(),
 });

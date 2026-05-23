@@ -11,6 +11,8 @@ export const auditLogs = pgTable(
 		publicId: uuid('public_id').defaultRandom().notNull().unique(),
 		actorId: integer('actor_id').references(() => users.id, { onDelete: 'set null' }),
 		actorRole: roleTypeEnum('actor_role'),
+		actorName: text('actor_name'),
+		actorEmail: text('actor_email'),
 		action: varchar('action', { length: 100 }).notNull(),
 		targetType: varchar('target_type', { length: 50 }).notNull(),
 		targetId: varchar('target_id', { length: 100 }).notNull(),
@@ -25,5 +27,6 @@ export const auditLogs = pgTable(
 		index('audit_logs_action_idx').on(table.action),
 		index('audit_logs_target_id_idx').on(table.targetId),
 		index('audit_logs_created_at_idx').on(table.createdAt),
+		index('audit_logs_actor_email_idx').on(table.actorEmail),
 	],
 );
