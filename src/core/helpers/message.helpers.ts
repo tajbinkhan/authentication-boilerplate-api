@@ -50,6 +50,7 @@ export const zodMessages = {
 			invalidUpperCase: (field: string) => `${field} must be at least one upper case.`,
 			invalidLowerCase: (field: string) => `${field} must be at least one lower case.`,
 			invalidNumericCase: (field: string) => `${field} must be at least one number.`,
+			invalidSpecialCase: (field: string) => `${field} must be at least one special character.`,
 			invalidPhoneNumber: (field: string) => `${field} must be a valid phone number.`,
 			invalidUsername: (field: string) =>
 				`${field} must contain only letters, numbers, and underscores.`,
@@ -62,3 +63,4 @@ export const zodMessages = {
 		},
 	},
 };
+

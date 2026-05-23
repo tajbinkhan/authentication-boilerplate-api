@@ -80,7 +80,7 @@ export class AuthRepository {
 
 	async updateUser(
 		userId: number,
-		data: UpdateProfileDto & Pick<Partial<UserSchemaType>, 'imageInformation'>,
+		data: UpdateProfileDto & Pick<Partial<UserSchemaType>, 'imageInformation' | 'password'>,
 		db: AuthDbClient = this.db,
 	): Promise<UserSchemaType> {
 		return db
@@ -165,3 +165,4 @@ export class AuthRepository {
 		});
 	}
 }
+

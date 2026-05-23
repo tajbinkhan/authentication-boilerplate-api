@@ -1,6 +1,6 @@
 import type { UserSchemaType } from '../../../database/types';
 
-export type UserWithoutPassword = Omit<UserSchemaType, 'password' | 'twoFactorSecretEncrypted'>;
+export type UserWithoutPassword = Omit<UserSchemaType, 'password' | 'twoFactorSecretEncrypted'> & { hasPassword: boolean };
 
 export const dashboardAccessRestrictionCodes = [
 	'account_pending_approval',
@@ -28,7 +28,7 @@ export type CreateUser = Omit<
 export type UserWithoutPasswordResponse = Omit<
 	UserSchemaType,
 	'id' | 'publicId' | 'password' | 'twoFactorSecretEncrypted'
-> & { id: string };
+> & { id: string; hasPassword: boolean };
 
 export interface UserInformation {
 	userId: number;
@@ -54,3 +54,5 @@ export interface VerifiedGoogleProfile {
 	googleId: string;
 	emailVerified: boolean;
 }
+
+

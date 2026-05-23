@@ -6,7 +6,10 @@ export function stripUserPassword(user: UserSchemaType): UserWithoutPassword {
 	void password;
 	void twoFactorSecretEncrypted;
 
-	return userWithoutPassword;
+	return {
+		...userWithoutPassword,
+		hasPassword: !!password,
+	};
 }
 
 export function mapUserResponse(user: UserWithoutPassword): UserWithoutPasswordResponse {
@@ -14,5 +17,10 @@ export function mapUserResponse(user: UserWithoutPassword): UserWithoutPasswordR
 		...user,
 		id: user.publicId,
 		imageInformation: null,
+		hasPassword: user.hasPassword,
 	};
 }
+
+
+
+

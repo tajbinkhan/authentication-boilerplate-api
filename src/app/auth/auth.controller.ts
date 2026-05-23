@@ -30,9 +30,8 @@ import {
 } from '../../core/interceptors/api-response.interceptor';
 import { ZodValidationPipe } from '../../core/pipes/zod-validation.pipe';
 import { EnvType } from '../../core/validators/env';
-import { FILE_SIZE_LIMIT, singleFileSchema, ZodFileValidationPipe } from '../media/media.pipe';
 import { AuditLogService } from '../audit-log/audit-log.service';
-import type { UserWithoutPassword, UserWithoutPasswordResponse } from './core/auth.types';
+import { FILE_SIZE_LIMIT, singleFileSchema, ZodFileValidationPipe } from '../media/media.pipe';
 import { mapUserResponse } from './core/auth.mapper';
 import {
 	type GoogleLoginDto,
@@ -45,24 +44,26 @@ import {
 	updateProfileSchema,
 } from './core/auth.schema';
 import { AuthService } from './core/auth.service';
+import type { UserWithoutPassword, UserWithoutPasswordResponse } from './core/auth.types';
+import {
+	type ChangePasswordDto,
+	changePasswordSchema,
+	type PasswordLoginDto,
+	passwordLoginSchema,
+	type SetPasswordDto,
+	setPasswordSchema,
+} from './core/password.schema';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { PartialJwtAuthGuard } from './guards/partial-jwt-auth.guard';
-import { mapSessionResponse } from './session/session.mapper';
-import { SessionService } from './session/session.service';
+import { TwoFaRequiredGuard } from './guards/two-fa-required.guard';
 import { TwoFactorAlertEmailService } from './services/two-factor-alert-email.service';
-import {
-	type SessionListQueryDto,
-	sessionListQuerySchema,
-} from './session/session.schema';
-import type {
-	SessionListResponse,
-	SessionResponse,
-} from './session/session.types';
+import { mapSessionResponse } from './session/session.mapper';
+import { type SessionListQueryDto, sessionListQuerySchema } from './session/session.schema';
+import { SessionService } from './session/session.service';
+import type { SessionListResponse, SessionResponse } from './session/session.types';
+import type { PartialAuthRequest } from './strategies/jwt-partial.strategy';
+import { type TwoFactorCodeDto, twoFactorCodeSchema } from './two-factor/two-factor.schema';
 import { TwoFactorService } from './two-factor/two-factor.service';
-import {
-	type TwoFactorCodeDto,
-	twoFactorCodeSchema,
-} from './two-factor/two-factor.schema';
 import type {
 	TwoFactorDisableResponse,
 	TwoFactorRecoveryCodesResponse,
@@ -70,7 +71,6 @@ import type {
 	TwoFactorStatusResponse,
 	TwoFactorVerifyResponse,
 } from './two-factor/two-factor.types';
-import type { PartialAuthRequest } from './strategies/jwt-partial.strategy';
 
 @Controller('auth')
 export class AuthController {
@@ -340,11 +340,7 @@ export class AuthController {
 		@Body(new ZodValidationPipe(twoFactorCodeSchema)) body: TwoFactorCodeDto,
 	): Promise<ApiResponse<TwoFactorRecoveryCodesResponse>> {
 		const session = await this.getCurrentSession(user, request);
-		const result = await this.twoFactorService.regenerateRecoveryCodes(
-			user,
-			session,
-			body.code,
-		);
+		const result = await this.twoFactorService.regenerateRecoveryCodes(user, session, body.code);
 
 		return createApiResponse(
 			HttpStatus.OK,
@@ -355,9 +351,7 @@ export class AuthController {
 
 	@UseGuards(JwtAuthGuard)
 	@Get('me')
-	getProfile(
-		@CurrentUser() user: UserWithoutPassword,
-	): ApiResponse<UserWithoutPasswordResponse> {
+	getProfile(@CurrentUser() user: UserWithoutPassword): ApiResponse<UserWithoutPasswordResponse> {
 		return createApiResponse(
 			HttpStatus.OK,
 			'User profile fetched successfully',
@@ -506,6 +500,106 @@ export class AuthController {
 		});
 
 		return createApiResponse(HttpStatus.OK, 'Google login successful', mapUserResponse(user));
+	}
+
+	@Throttle({
+		short: { limit: 3, ttl: 60000 },
+		long: { limit: 10, ttl: 300000 },
+	})
+	@Post('login')
+	@HttpCode(HttpStatus.OK)
+	async passwordLogin(
+		@Body(new ZodValidationPipe(passwordLoginSchema)) loginDto: PasswordLoginDto,
+		@Request() request: ExpressRequest,
+	): Promise<ApiResponse<UserWithoutPasswordResponse>> {
+		const user = await this.authService.validateUser(loginDto);
+		const userDeviceInfo = this.sessionService.getSessionInfo(request);
+
+		await this.authService.assertCanAccessDashboard(user);
+
+		const accessToken = await this.authService.generateAccessToken({
+			userId: user.id,
+			email: user.email,
+			userAgent: userDeviceInfo.userAgent,
+			ipAddress: userDeviceInfo.ipAddress,
+			deviceName: userDeviceInfo.deviceName,
+			deviceType: userDeviceInfo.deviceType,
+		});
+
+		request.res?.cookie(
+			'access-token',
+			accessToken,
+			AppHelpers.accessTokenCookieConfig(this.configService),
+		);
+
+		await this.auditLogService.logAction({
+			actor: user,
+			action: 'LOGIN_SUCCESS',
+			targetType: 'user',
+			targetId: user.publicId,
+			metadata: {
+				method: 'password',
+				deviceName: userDeviceInfo.deviceName,
+				deviceType: userDeviceInfo.deviceType,
+			},
+			request,
+		});
+
+		return createApiResponse(HttpStatus.OK, 'Login successful', mapUserResponse(user));
+	}
+
+	@UseGuards(JwtAuthGuard, TwoFaRequiredGuard)
+	@Throttle({
+		short: { limit: 3, ttl: 60000 },
+		long: { limit: 10, ttl: 300000 },
+	})
+	@Post('password/set')
+	@HttpCode(HttpStatus.OK)
+	async setPassword(
+		@CurrentUser() user: UserWithoutPassword,
+		@Request() request: ExpressRequest,
+		@Body(new ZodValidationPipe(setPasswordSchema)) body: SetPasswordDto,
+	): Promise<ApiResponse<UserWithoutPasswordResponse>> {
+		const updatedUser = await this.authService.setPassword(user.id, body.password, true);
+
+		await this.auditLogService.logAction({
+			actor: user,
+			action: 'PASSWORD_SET',
+			targetType: 'user',
+			targetId: user.publicId,
+			request,
+		});
+
+		return createApiResponse(
+			HttpStatus.OK,
+			'Password set successfully',
+			mapUserResponse(updatedUser),
+		);
+	}
+
+	@UseGuards(JwtAuthGuard, TwoFaRequiredGuard)
+	@Throttle({
+		short: { limit: 3, ttl: 60000 },
+		long: { limit: 10, ttl: 300000 },
+	})
+	@Post('password/change')
+	@HttpCode(HttpStatus.OK)
+	async changePassword(
+		@CurrentUser() user: UserWithoutPassword,
+		@Request() request: ExpressRequest,
+		@Body(new ZodValidationPipe(changePasswordSchema)) body: ChangePasswordDto,
+	): Promise<ApiResponse<null>> {
+		await this.authService.changePassword(user.id, body.currentPassword, body.newPassword);
+
+		await this.auditLogService.logAction({
+			actor: user,
+			action: 'PASSWORD_CHANGED',
+			targetType: 'user',
+			targetId: user.publicId,
+			request,
+		});
+
+		return createApiResponse(HttpStatus.OK, 'Password changed successfully', null);
 	}
 
 	private getSessionToken(request: ExpressRequest): string {

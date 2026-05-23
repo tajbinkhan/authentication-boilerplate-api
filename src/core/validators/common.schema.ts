@@ -357,10 +357,11 @@ const passwordRules = [
 	{ regex: /[A-Z]/, msg: (name: string) => zodMessages.error.invalid.invalidUpperCase(name) },
 	{ regex: /[a-z]/, msg: (name: string) => zodMessages.error.invalid.invalidLowerCase(name) },
 	{ regex: /\d/, msg: (name: string) => zodMessages.error.invalid.invalidNumericCase(name) },
+	{ regex: /[^A-Za-z0-9]/, msg: (name: string) => zodMessages.error.invalid.invalidSpecialCase(name) },
 ];
 
 const passwordSchema = (name: string) =>
-	baseString(name, { min: 6 }).superRefine((val, ctx) => {
+	baseString(name, { min: 8 }).superRefine((val, ctx) => {
 		passwordRules.forEach(rule => {
 			if (!rule.regex.test(val)) {
 				ctx.addIssue({ code: 'custom', message: rule.msg(name) });
@@ -381,3 +382,5 @@ export const metaSeoSchema = z.object({
 	metaKeywords: baseString('Meta Keywords').optional(),
 	metaThumbnailId: validatePositiveNumber('Meta Thumbnail ID').optional(),
 });
+
+

@@ -340,6 +340,29 @@ export class AuthService {
 		return stripUserPassword(updatedUser);
 	}
 
+	async setPassword(userId: number, password: string, requireNoPassword = false): Promise<UserWithoutPassword> {
+		const existingUser = await this.authRepository.findUserById(userId);
+		if (!existingUser) throw notFoundError('user_not_found', 'User not found');
+		if (requireNoPassword && existingUser.password) throw badRequestError('Password is already set');
+
+		const hashedPassword = await bcrypt.hash(password, 10);
+		const updatedUser = await this.authRepository.updateUser(userId, { password: hashedPassword });
+
+		return stripUserPassword(updatedUser);
+	}
+
+	async changePassword(userId: number, currentPassword: string, newPassword: string): Promise<void> {
+		const existingUser = await this.authRepository.findUserById(userId);
+		if (!existingUser) throw notFoundError('user_not_found', 'User not found');
+		if (!existingUser.password) throw unauthorizedError('Password is not set');
+
+		const isCurrentValid = await bcrypt.compare(currentPassword, existingUser.password);
+		if (!isCurrentValid) throw unauthorizedError('Current password is incorrect');
+
+		const hashedPassword = await bcrypt.hash(newPassword, 10);
+		await this.authRepository.updateUser(userId, { password: hashedPassword });
+	}
+
 	async updateUserProfileImage(
 		userId: number,
 		file: Express.Multer.File,
@@ -577,3 +600,6 @@ export class AuthService {
 		};
 	}
 }
+
+
+
