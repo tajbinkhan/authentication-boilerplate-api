@@ -17,7 +17,6 @@ integrations.
 - TypeScript
 - Drizzle ORM + PostgreSQL
 - Zod for environment and request validation
-- Jest for unit and e2e testing
 
 ## Modules
 
@@ -64,11 +63,6 @@ pnpm run db:migrate
 pnpm run db:push
 pnpm run db:studio
 
-# Tests
-pnpm run test
-pnpm run test:cov
-pnpm run test:e2e
-
 # Lint
 pnpm run lint
 ```
@@ -94,7 +88,6 @@ when you add or modify endpoints.
 
 - Follow existing module boundaries in `src/app/*`.
 - Add or update docs in `docs/api/` when changing public API contracts.
-- Tests: prefer focused unit tests and keep e2e tests in `test/`.
 
 ## Notes
 

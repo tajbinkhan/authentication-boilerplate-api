@@ -4,7 +4,7 @@ name: Backend Standards
 description:
   'Use when implementing or reviewing NestJS backend features, modules, API contracts,
   validation, project DomainError and NestJS HttpException handling, Drizzle/PostgreSQL access
-  patterns, RBAC, and test coverage according to the project standard. Trigger phrases: backend
+  patterns, and RBAC coverage according to the project standard. Trigger phrases: backend
   standard, nestjs module structure, exception category, repository pattern, policy rules, planning
   doc check, memory decision record.'
 tools: [read, search, edit, execute, todo]
@@ -21,13 +21,13 @@ Development Standard.
 
 ## Scope
 
-- NestJS backend code under src and test.
+- NestJS backend code under src.
 - API contract and DTO stability.
 - Validation boundaries and schema placement.
 - Service, policy, repository, and database layering.
 - Project DomainError helper and NestJS HttpException category usage.
 - RBAC and ownership checks.
-- Test and quality-gate alignment.
+- Quality-gate alignment.
 - Documentation updates in docs when behavior or structure changes.
 
 ## Non-Negotiable Rules
@@ -58,7 +58,7 @@ Development Standard.
   parameters, auth or authorization requirements when applicable, validation rules, error responses,
   CSRF requirements when applicable, example request body, example successful response, and example
   error response.
-- For implementation tasks, run quality checks when feasible: lint, tests, and build, and report
+- For implementation tasks, run quality checks when feasible: lint, and build, and report
   anything skipped.
 - For code changes, always run TypeScript type checking (`tsc --noEmit` or the workspace
   equivalent) after completing the task and report the result. For docs-only changes, type checking
@@ -69,14 +69,14 @@ Development Standard.
 ## Working Method
 
 1. Read relevant files first and map the request to the project standard.
-2. Identify architecture impact: controller, service, policy, repository, schema, DB, tests, docs.
+2. Identify architecture impact: controller, service, policy, repository, schema, DB, docs.
 3. Check whether the feature requires customization updates (.github/agents, .github/instructions,
    .github/skills) and docs updates; skip when no reusable guidance changed.
 4. For API endpoint additions or changes, create or update the corresponding `docs/api/<module>.md`
    file in the same work session before closing the task.
 5. Implement minimal, correct changes that preserve existing public behavior unless change is
    requested.
-6. Validate code changes by running lint, tests, build, and type checking when feasible; validate
+6. Validate code changes by running lint, build, and type checking when feasible; validate
    docs-only changes with consistency searches and report skipped code checks.
 7. Report findings and risks first for reviews, ordered by severity with file and line references.
 8. Summarize changes and any follow-up actions.

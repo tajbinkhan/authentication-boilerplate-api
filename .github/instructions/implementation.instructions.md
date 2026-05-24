@@ -2,12 +2,11 @@
 description:
   'Use when implementing or reviewing NestJS backend code in this project. Enforces
   controller/service/policy/repository boundaries, project DomainError and NestJS HttpException
-  usage, validation boundaries, transaction usage, DTO stability, and test/quality-gate
+  usage, validation boundaries, transaction usage, DTO stability, and quality-gate
   expectations.'
 name: 'Backend Implementation Standards'
 applyTo:
   - 'src/**/*.ts'
-  - 'test/**/*.ts'
 ---
 
 # Backend Implementation Standards
@@ -80,15 +79,6 @@ Apply these rules when creating or modifying backend code.
 - Apply auth guards for protected routes.
 - Apply role guards for admin routes.
 - Keep ownership checks in service/policy logic even when role guards exist.
-
-## Tests and Verification
-
-- Add/update unit tests for pure logic and policy checks.
-- Add/update integration or e2e tests for lifecycle and conflict behavior.
-- For implementation tasks, run lint, tests, and build when feasible, and report anything skipped.
-- For code changes, always run TypeScript type checking (`tsc --noEmit` or the workspace
-  equivalent) after completing the task and report the result. For docs-only changes, type checking
-  is optional; if skipped or if pre-existing failures block it, report that clearly.
 
 ## Customization And Documentation Sync
 
