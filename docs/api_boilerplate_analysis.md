@@ -1,6 +1,6 @@
 # API Boilerplate — Gap Analysis & Feedback Report
 
-> **Stack**: NestJS 11, Drizzle ORM, PostgreSQL, Zod, JWT (cookie-based), Cloudinary, Brevo (email),
+> **Stack**: NestJS 11, Drizzle ORM, PostgreSQL, Zod, JWT (cookie-based), Cloudinary, SMTP multi-provider email (Brevo, Resend, Nodemailer, AWS SES),
 > Google OAuth
 
 ---
@@ -232,13 +232,14 @@ access token + refresh token pattern.
 
 **Severity: Medium**
 
-`validateEnv` requires ALL env vars (including `CLOUDINARY_*`, `BREVO_*`, `GOOGLE_CLIENT_ID`) to be
+`validateEnv` requires ALL env vars (including `CLOUDINARY_*`, `GOOGLE_CLIENT_ID`) to be
 set even if those features are not needed. This is a painful DX issue.
 
 **What's missing:**
 
 - No optional service env groups (e.g. `CLOUDINARY_ENABLED=false` to skip cloud upload)
-- Cloudinary, Brevo, and Google env vars should be **conditionally required** based on feature flags
+- Cloudinary and Google env vars should be **conditionally required** based on feature flags
+- Email provider credentials are no longer env-based — they are configured at runtime via the SMTP Providers API
 - New developers who just want to run the boilerplate locally face immediate env friction
 
 ---
@@ -401,7 +402,7 @@ methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
 5. Fix Docker volume path + add `healthcheck`
 
 **Phase 2 — Boilerplate Completeness:** 6. Add Swagger/OpenAPI setup 7. Paginate the media listing
-endpoint 8. Make Cloudinary/Brevo/Google env vars conditional 9. Add structured logging
+endpoint 8. Make Cloudinary/Google env vars conditional (email providers are now database-driven) 9. Add structured logging
 (pino/winston) 10. Add GitHub Actions CI workflow
 
 **Phase 3 — Enterprise Hardening:** 11. Add audit log table + service 12. Add soft delete for

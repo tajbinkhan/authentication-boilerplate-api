@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-import { BrevoService } from '../../brevo/brevo.service';
+import { EmailDispatcherService } from '../../smtp/email-dispatcher.service';
 
 interface SendWelcomeEmailParams {
 	email: string;
@@ -13,11 +13,11 @@ const welcomeTemplateKey = 'auth_welcome';
 export class WelcomeEmailService {
 	private readonly logger = new Logger(WelcomeEmailService.name);
 
-	constructor(private readonly brevoService: BrevoService) {}
+	constructor(private readonly emailDispatcher: EmailDispatcherService) {}
 
 	async sendWelcomeEmail(params: SendWelcomeEmailParams): Promise<void> {
 		try {
-			await this.brevoService.sendFromTemplate({
+			await this.emailDispatcher.sendFromTemplate({
 				templateKey: welcomeTemplateKey,
 				to: [{ email: params.email, name: params.name ?? undefined }],
 				params: {

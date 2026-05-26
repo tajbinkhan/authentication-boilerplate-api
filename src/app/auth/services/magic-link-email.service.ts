@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { badGatewayError } from '../../../core/errors/domain-error';
 import { magicLinkTimeout } from '../../../core/helpers/constant.helper';
-import { BrevoService } from '../../brevo/brevo.service';
+import { EmailDispatcherService } from '../../smtp/email-dispatcher.service';
 
 interface SendMagicLinkEmailParams {
 	email: string;
@@ -15,11 +15,11 @@ const minuteMs = 1000 * 60;
 
 @Injectable()
 export class MagicLinkEmailService {
-	constructor(private readonly brevoService: BrevoService) {}
+	constructor(private readonly emailDispatcher: EmailDispatcherService) {}
 
 	async sendMagicLinkEmail(params: SendMagicLinkEmailParams): Promise<void> {
 		try {
-			await this.brevoService.sendFromTemplate({
+			await this.emailDispatcher.sendFromTemplate({
 				templateKey: magicLinkTemplateKey,
 				to: [{ email: params.email }],
 				params: {

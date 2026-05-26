@@ -6,29 +6,29 @@ import { PassportModule } from '@nestjs/passport';
 import { sessionTimeout } from '../../core/helpers/constant.helper';
 import { EnvType } from '../../core/validators/env';
 import { AuditLogModule } from '../audit-log/audit-log.module';
-import { BrevoModule } from '../brevo/brevo.module';
+import { SmtpModule } from '../smtp/smtp.module';
 import { SystemModule } from '../system/system.module';
+import { AuthController } from './auth.controller';
 import { AUTH_CLOUDINARY_SERVICE, authCloudinaryProvider } from './core/auth.providers';
 import { AuthRepository } from './core/auth.repository';
 import { AuthService } from './core/auth.service';
-import { SessionRepository } from './session/session.repository';
-import { SessionService } from './session/session.service';
-import { TwoFactorRepository } from './two-factor/two-factor.repository';
-import { TwoFactorService } from './two-factor/two-factor.service';
 import { ApprovalEmailService } from './services/approval-email.service';
 import { InvitationEmailService } from './services/invitation-email.service';
 import { MagicLinkEmailService } from './services/magic-link-email.service';
 import { TwoFactorAlertEmailService } from './services/two-factor-alert-email.service';
 import { WelcomeEmailService } from './services/welcome-email.service';
-import { JwtStrategy } from './strategies/jwt.strategy';
+import { SessionRepository } from './session/session.repository';
+import { SessionService } from './session/session.service';
 import { JwtPartialStrategy } from './strategies/jwt-partial.strategy';
-import { AuthController } from './auth.controller';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { TwoFactorRepository } from './two-factor/two-factor.repository';
+import { TwoFactorService } from './two-factor/two-factor.service';
 
 @Module({
 	imports: [
 		PassportModule,
 		AuditLogModule,
-		BrevoModule,
+		SmtpModule,
 		SystemModule,
 		JwtModule.registerAsync({
 			imports: [ConfigModule],

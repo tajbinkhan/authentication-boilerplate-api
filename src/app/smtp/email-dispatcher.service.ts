@@ -45,7 +45,7 @@ export class EmailDispatcherService {
 		for (const providerRecord of activeProviders) {
 			try {
 				const decryptedConfig = JSON.parse(
-					this.cryptoService.decrypt(providerRecord.config as string),
+					this.cryptoService.decrypt(providerRecord.config),
 				);
 
 				const provider = this.providers.get(providerRecord.providerType);

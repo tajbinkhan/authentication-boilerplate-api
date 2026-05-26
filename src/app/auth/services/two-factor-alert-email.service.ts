@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-import { BrevoService } from '../../brevo/brevo.service';
+import { EmailDispatcherService } from '../../smtp/email-dispatcher.service';
 
 export type TwoFactorAlertEvent = 'enabled' | 'disabled' | 'reset';
 
@@ -24,11 +24,11 @@ const eventLabels: Record<TwoFactorAlertEvent, string> = {
 export class TwoFactorAlertEmailService {
 	private readonly logger = new Logger(TwoFactorAlertEmailService.name);
 
-	constructor(private readonly brevoService: BrevoService) {}
+	constructor(private readonly emailDispatcher: EmailDispatcherService) {}
 
 	async sendTwoFactorAlertEmail(params: SendTwoFactorAlertEmailParams): Promise<void> {
 		try {
-			await this.brevoService.sendFromTemplate({
+			await this.emailDispatcher.sendFromTemplate({
 				templateKey: twoFactorAlertTemplateKey,
 				to: [{ email: params.email, name: params.name ?? undefined }],
 				params: {

@@ -210,7 +210,7 @@ export class SmtpProvidersService {
 	): Promise<TestConnectionResult> {
 		const provider = await this.getTargetProvider(publicId);
 
-		const decryptedConfig = JSON.parse(this.cryptoService.decrypt(provider.config as string));
+		const decryptedConfig = JSON.parse(this.cryptoService.decrypt(provider.config));
 		const emailProvider = this.providers.get(provider.providerType);
 
 		if (!emailProvider) {

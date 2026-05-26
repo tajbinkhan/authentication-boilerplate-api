@@ -175,19 +175,19 @@ logging. Password authentication changes are explicitly excluded.
 
 #### [NEW] [welcome-email.service.ts](file:///f:/boilerplate/api/src/app/auth/services/welcome-email.service.ts)
 
-- Inject `BrevoService` to send using template `auth_welcome`.
+- Inject `EmailDispatcherService` to send using template `auth_welcome`.
 
 #### [NEW] [approval-email.service.ts](file:///f:/boilerplate/api/src/app/auth/services/approval-email.service.ts)
 
-- Inject `BrevoService` to send using template `auth_account_approval`.
+- Inject `EmailDispatcherService` to send using template `auth_account_approval`.
 
 #### [NEW] [invitation-email.service.ts](file:///f:/boilerplate/api/src/app/auth/services/invitation-email.service.ts)
 
-- Inject `BrevoService` to send using template `auth_invitation`.
+- Inject `EmailDispatcherService` to send using template `auth_invitation`.
 
 #### [NEW] [two-factor-alert-email.service.ts](file:///f:/boilerplate/api/src/app/auth/services/two-factor-alert-email.service.ts)
 
-- Inject `BrevoService` to send using template `auth_two_factor_alert`.
+- Inject `EmailDispatcherService` to send using template `auth_two_factor_alert`.
 
 #### [MODIFY] [auth.module.ts](file:///f:/boilerplate/api/src/app/auth/auth.module.ts)
 

@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import type { EnvType } from '../../../core/validators/env';
-import { BrevoService } from '../../brevo/brevo.service';
+import { EmailDispatcherService } from '../../smtp/email-dispatcher.service';
 
 interface SendApprovalEmailParams {
 	email: string;
@@ -17,13 +17,13 @@ export class ApprovalEmailService {
 	private readonly logger = new Logger(ApprovalEmailService.name);
 
 	constructor(
-		private readonly brevoService: BrevoService,
+		private readonly emailDispatcher: EmailDispatcherService,
 		private readonly configService: ConfigService<EnvType, true>,
 	) {}
 
 	async sendApprovalEmail(params: SendApprovalEmailParams): Promise<void> {
 		try {
-			await this.brevoService.sendFromTemplate({
+			await this.emailDispatcher.sendFromTemplate({
 				templateKey: approvalTemplateKey,
 				to: [{ email: params.email, name: params.name ?? undefined }],
 				params: {

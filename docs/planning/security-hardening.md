@@ -232,13 +232,14 @@ Passwords are validated at two levels:
 
 ## API Key Management
 
-All third-party API keys are managed through environment variables:
+All third-party API keys are managed through environment variables or the database:
 
 - **Never hardcoded** — all secrets come from `.env` or the hosting platform's secret manager
 - **Validated at startup** — missing required keys cause the application to fail fast with
   clear error messages
-- **Conditional validation** — integration keys (Google, Cloudinary, Brevo) are only required
+- **Conditional validation** — integration keys (Google, Cloudinary) are only required
   when their respective feature flags are enabled
+- **Database-managed** — email provider credentials (Brevo, Resend, Nodemailer, AWS SES) are stored encrypted in the database and configured via the SMTP Providers API
 
 ### Required Secrets (Always)
 
@@ -250,7 +251,6 @@ All third-party API keys are managed through environment variables:
 
 - `GOOGLE_CLIENT_ID` — required when `GOOGLE_LOGIN_ENABLED=true`
 - `CLOUDINARY_*` — required when `CLOUDINARY_ENABLED=true`
-- `BREVO_*` — required when `BREVO_ENABLED=true`
 
 ---
 

@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 
 import type { RoleTypeEnum } from '../../../database/types';
 import type { EnvType } from '../../../core/validators/env';
-import { BrevoService } from '../../brevo/brevo.service';
+import { EmailDispatcherService } from '../../smtp/email-dispatcher.service';
 
 interface SendInvitationEmailParams {
 	email: string;
@@ -19,13 +19,13 @@ export class InvitationEmailService {
 	private readonly logger = new Logger(InvitationEmailService.name);
 
 	constructor(
-		private readonly brevoService: BrevoService,
+		private readonly emailDispatcher: EmailDispatcherService,
 		private readonly configService: ConfigService<EnvType, true>,
 	) {}
 
 	async sendInvitationEmail(params: SendInvitationEmailParams): Promise<void> {
 		try {
-			await this.brevoService.sendFromTemplate({
+			await this.emailDispatcher.sendFromTemplate({
 				templateKey: invitationTemplateKey,
 				to: [{ email: params.email, name: params.name ?? undefined }],
 				params: {

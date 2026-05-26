@@ -25,7 +25,6 @@ const coreEnvSchema = z.object({
 const integrationFlagsSchema = z.object({
 	GOOGLE_LOGIN_ENABLED: validateEnum('GOOGLE_LOGIN_ENABLED', ['true', 'false']).default('false'),
 	CLOUDINARY_ENABLED: validateEnum('CLOUDINARY_ENABLED', ['true', 'false']).default('false'),
-	BREVO_ENABLED: validateEnum('BREVO_ENABLED', ['true', 'false']).default('false'),
 });
 
 const integrationCredentialsSchema = z.object({
@@ -34,10 +33,6 @@ const integrationCredentialsSchema = z.object({
 	CLOUDINARY_CLOUD_NAME: validateString('CLOUDINARY_CLOUD_NAME').optional(),
 	CLOUDINARY_API_KEY: validateString('CLOUDINARY_API_KEY').optional(),
 	CLOUDINARY_API_SECRET: validateString('CLOUDINARY_API_SECRET').optional(),
-
-	BREVO_API_KEY: validateString('BREVO_API_KEY').optional(),
-	BREVO_SENDER_EMAIL: validateString('BREVO_SENDER_EMAIL').optional(),
-	BREVO_SENDER_NAME: validateString('BREVO_SENDER_NAME').optional(),
 });
 
 const healthCheckSchema = z.object({
@@ -141,30 +136,6 @@ export const envSchema = z
 					code: 'custom',
 					message: 'CLOUDINARY_API_SECRET is required when CLOUDINARY_ENABLED is true',
 					path: ['CLOUDINARY_API_SECRET'],
-				});
-			}
-		}
-
-		if (data.BREVO_ENABLED === 'true') {
-			if (!data.BREVO_API_KEY) {
-				ctx.addIssue({
-					code: 'custom',
-					message: 'BREVO_API_KEY is required when BREVO_ENABLED is true',
-					path: ['BREVO_API_KEY'],
-				});
-			}
-			if (!data.BREVO_SENDER_EMAIL) {
-				ctx.addIssue({
-					code: 'custom',
-					message: 'BREVO_SENDER_EMAIL is required when BREVO_ENABLED is true',
-					path: ['BREVO_SENDER_EMAIL'],
-				});
-			}
-			if (!data.BREVO_SENDER_NAME) {
-				ctx.addIssue({
-					code: 'custom',
-					message: 'BREVO_SENDER_NAME is required when BREVO_ENABLED is true',
-					path: ['BREVO_SENDER_NAME'],
 				});
 			}
 		}

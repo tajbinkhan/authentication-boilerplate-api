@@ -2,6 +2,8 @@
 
 Admin-only endpoints for managing SMTP email providers. Supports Brevo, Resend, generic SMTP (nodemailer), and AWS SES.
 
+> **Note:** This is the active email sending system for the application. All auth emails (magic links, welcome, approval, invitation, 2FA alerts) are dispatched through `EmailDispatcherService`, which reads provider configuration from the database. At least one active SMTP provider must exist in the `smtp_providers` table for emails to be sent.
+
 All routes require the `access-token` HTTP-only cookie and the caller must have an admin role.
 Unsafe methods require a CSRF token from `GET /csrf` sent as `x-csrf-token`.
 

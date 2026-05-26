@@ -59,7 +59,7 @@ This document outlines the detailed roadmap for implementing **Phase 1** and **P
 
 ### Step 6: Make Third-Party Credentials Optional
 * **File**: `f:\boilerplate\api\src\core\validators\env.ts`
-* **Modification**: Change `.shape` schemas of Cloudinary, Brevo, and Google schemas to be `.optional()` under `envSchema`. Raise warnings or service-level errors only when their actual controllers/services are invoked.
+* **Modification**: Change `.shape` schemas of Cloudinary and Google schemas to be `.optional()` under `envSchema`. Raise warnings or service-level errors only when their actual controllers/services are invoked. Email provider credentials (Brevo, Resend, etc.) are no longer env-based — they are configured at runtime via the SMTP Providers API.
 
 ### Step 7: Update `.env.example`
 * **File**: `f:\boilerplate\api\.env.example`

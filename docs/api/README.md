@@ -14,7 +14,7 @@ not from `routes.json`.
 - [System](system.md): application-level access model and role configuration.
 - [Users](users.md): admin user directory, user CRUD, role updates, and session revocation.
 
-`brevo` and `template` are internal app modules and do not expose public API routes.
+`template` is an internal app module and does not expose public API routes.
 
 ## Success Envelope
 
