@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
+import { EmailTemplatesController } from './email-template.controller';
 import { EmailTemplateRepository } from './email-template.repository';
 import { EmailTemplateService } from './email-template.service';
-import { EmailTemplatesController } from './email-templates.controller';
 
 @Module({
 	controllers: [EmailTemplatesController],
