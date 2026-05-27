@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 
 import type { RoleTypeEnum } from '../../../database/types';
 import type { EnvType } from '../../../core/validators/env';
+import { TEMPLATE_KEYS } from '../../email-template/email-template.registry';
 import { EmailDispatcherService } from '../../smtp/email-dispatcher.service';
 
 interface SendInvitationEmailParams {
@@ -11,8 +12,6 @@ interface SendInvitationEmailParams {
 	role: RoleTypeEnum;
 	createdByName?: string | null;
 }
-
-const invitationTemplateKey = 'auth_invitation';
 
 @Injectable()
 export class InvitationEmailService {
@@ -26,13 +25,13 @@ export class InvitationEmailService {
 	async sendInvitationEmail(params: SendInvitationEmailParams): Promise<void> {
 		try {
 			await this.emailDispatcher.sendFromTemplate({
-				templateKey: invitationTemplateKey,
+				templateKey: TEMPLATE_KEYS.AUTH_INVITATION,
 				to: [{ email: params.email, name: params.name ?? undefined }],
 				params: {
 					name: params.name ?? 'there',
 					role: params.role,
 					createdByName: params.createdByName ?? 'an administrator',
-					appUrl: this.configService.get('APP_URL', { infer: true }),
+					appUrl: this.configService.get('APP_URL', { infer: true }) as string,
 					year: new Date().getFullYear(),
 				},
 			});

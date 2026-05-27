@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import type { EnvType } from '../../../core/validators/env';
+import { TEMPLATE_KEYS } from '../../email-template/email-template.registry';
 import { EmailDispatcherService } from '../../smtp/email-dispatcher.service';
 
 interface SendApprovalEmailParams {
@@ -9,8 +10,6 @@ interface SendApprovalEmailParams {
 	name?: string | null;
 	approvedByName?: string | null;
 }
-
-const approvalTemplateKey = 'auth_account_approval';
 
 @Injectable()
 export class ApprovalEmailService {
@@ -24,12 +23,12 @@ export class ApprovalEmailService {
 	async sendApprovalEmail(params: SendApprovalEmailParams): Promise<void> {
 		try {
 			await this.emailDispatcher.sendFromTemplate({
-				templateKey: approvalTemplateKey,
+				templateKey: TEMPLATE_KEYS.AUTH_ACCOUNT_APPROVAL,
 				to: [{ email: params.email, name: params.name ?? undefined }],
 				params: {
 					name: params.name ?? 'there',
 					approvedByName: params.approvedByName ?? 'an administrator',
-					appUrl: this.configService.get('APP_URL', { infer: true }),
+					appUrl: this.configService.get('APP_URL', { infer: true }) as string,
 					year: new Date().getFullYear(),
 				},
 			});

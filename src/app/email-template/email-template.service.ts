@@ -94,6 +94,7 @@ export class EmailTemplateService {
 			subject: data.subject ?? existing.subject,
 			html: data.html ?? existing.html,
 			text: data.text !== undefined ? data.text : existing.text ?? undefined,
+			variables: existing.variables,
 			isActive: data.isActive ?? true,
 			version: newVersion,
 		});

@@ -2,6 +2,7 @@ import {
 	boolean,
 	index,
 	integer,
+	jsonb,
 	pgTable,
 	serial,
 	text,
@@ -11,6 +12,7 @@ import {
 } from 'drizzle-orm/pg-core';
 
 import { timestamps } from '../../database/helpers';
+import type { TemplateVariableDescriptor } from '../../app/email-template/email-template.registry';
 
 export const emailTemplates = pgTable(
 	'email_templates',
@@ -21,6 +23,7 @@ export const emailTemplates = pgTable(
 		subject: text('subject').notNull(),
 		html: text('html').notNull(),
 		text: text('text'),
+		variables: jsonb('variables').$type<TemplateVariableDescriptor[]>().notNull().default([]),
 		version: integer('version').default(1).notNull(),
 		isActive: boolean('is_active').default(true).notNull(),
 		...timestamps,

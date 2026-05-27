@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { badGatewayError } from '../../../core/errors/domain-error';
 import { magicLinkTimeout } from '../../../core/helpers/constant.helper';
+import { TEMPLATE_KEYS } from '../../email-template/email-template.registry';
 import { EmailDispatcherService } from '../../smtp/email-dispatcher.service';
 
 interface SendMagicLinkEmailParams {
@@ -10,7 +11,6 @@ interface SendMagicLinkEmailParams {
 	redirectUrl: string;
 }
 
-const magicLinkTemplateKey = 'auth_magic_link';
 const minuteMs = 1000 * 60;
 
 @Injectable()
@@ -20,7 +20,7 @@ export class MagicLinkEmailService {
 	async sendMagicLinkEmail(params: SendMagicLinkEmailParams): Promise<void> {
 		try {
 			await this.emailDispatcher.sendFromTemplate({
-				templateKey: magicLinkTemplateKey,
+				templateKey: TEMPLATE_KEYS.AUTH_MAGIC_LINK,
 				to: [{ email: params.email }],
 				params: {
 					verificationUrl: params.verificationUrl,

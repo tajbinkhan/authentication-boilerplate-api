@@ -25,6 +25,7 @@ function toResponse(
 		subject: template.subject,
 		html: template.html,
 		text: template.text,
+		variables: template.variables,
 		version: template.version,
 		isActive: template.isActive,
 		createdAt: template.createdAt.toISOString(),

@@ -3,6 +3,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { badGatewayError } from '../../core/errors/domain-error';
 import { CryptoService } from '../../crypto/crypto.service';
 import type { SmtpProviderSchemaType } from '../../database/types';
+import type { TemplateKey, TemplateVariableMap } from '../email-template/email-template.registry';
 import { EmailTemplateService } from '../email-template/email-template.service';
 import { EmailLogsService } from '../email-logs/email-logs.service';
 import type { EmailProvider, SendEmailParams } from './interfaces/email-provider.interface';
@@ -86,10 +87,10 @@ export class EmailDispatcherService {
 		}
 	}
 
-	async sendFromTemplate(params: {
-		templateKey: string;
+	async sendFromTemplate<K extends string>(params: {
+		templateKey: K;
 		to: { email: string; name?: string }[];
-		params: Record<string, unknown>;
+		params: K extends TemplateKey ? TemplateVariableMap[K] : Record<string, unknown>;
 		replyTo?: { email: string; name?: string };
 		headers?: Record<string, string>;
 	}): Promise<void> {

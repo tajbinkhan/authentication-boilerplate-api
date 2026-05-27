@@ -1,9 +1,12 @@
+import type { TemplateVariableDescriptor } from '../email-template.registry';
+
 export interface EmailTemplateResponse {
 	publicId: string;
 	key: string;
 	subject: string;
 	html: string;
 	text: string | null;
+	variables: TemplateVariableDescriptor[];
 	version: number;
 	isActive: boolean;
 	createdAt: string;

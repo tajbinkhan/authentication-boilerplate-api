@@ -90,6 +90,7 @@ export class EmailTemplateRepository {
 		subject: string;
 		html: string;
 		text?: string;
+		variables?: import('./email-template.registry').TemplateVariableDescriptor[];
 		version: number;
 		isActive: boolean;
 	}): Promise<EmailTemplateSchemaType> {

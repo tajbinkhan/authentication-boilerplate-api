@@ -1,13 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 
+import { TEMPLATE_KEYS } from '../../email-template/email-template.registry';
 import { EmailDispatcherService } from '../../smtp/email-dispatcher.service';
 
 interface SendWelcomeEmailParams {
 	email: string;
 	name?: string | null;
 }
-
-const welcomeTemplateKey = 'auth_welcome';
 
 @Injectable()
 export class WelcomeEmailService {
@@ -18,7 +17,7 @@ export class WelcomeEmailService {
 	async sendWelcomeEmail(params: SendWelcomeEmailParams): Promise<void> {
 		try {
 			await this.emailDispatcher.sendFromTemplate({
-				templateKey: welcomeTemplateKey,
+				templateKey: TEMPLATE_KEYS.AUTH_WELCOME,
 				to: [{ email: params.email, name: params.name ?? undefined }],
 				params: {
 					name: params.name ?? 'there',

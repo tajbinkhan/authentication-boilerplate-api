@@ -1,8 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 
+import { TEMPLATE_KEYS, type TwoFactorAlertEvent } from '../../email-template/email-template.registry';
 import { EmailDispatcherService } from '../../smtp/email-dispatcher.service';
 
-export type TwoFactorAlertEvent = 'enabled' | 'disabled' | 'reset';
+export type { TwoFactorAlertEvent };
 
 interface SendTwoFactorAlertEmailParams {
 	email: string;
@@ -11,8 +12,6 @@ interface SendTwoFactorAlertEmailParams {
 	ipAddress?: string | null;
 	userAgent?: string | null;
 }
-
-const twoFactorAlertTemplateKey = 'auth_two_factor_alert';
 
 const eventLabels: Record<TwoFactorAlertEvent, string> = {
 	enabled: 'enabled',
@@ -29,7 +28,7 @@ export class TwoFactorAlertEmailService {
 	async sendTwoFactorAlertEmail(params: SendTwoFactorAlertEmailParams): Promise<void> {
 		try {
 			await this.emailDispatcher.sendFromTemplate({
-				templateKey: twoFactorAlertTemplateKey,
+				templateKey: TEMPLATE_KEYS.AUTH_TWO_FACTOR_ALERT,
 				to: [{ email: params.email, name: params.name ?? undefined }],
 				params: {
 					name: params.name ?? 'there',

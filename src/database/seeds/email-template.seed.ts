@@ -1,14 +1,16 @@
 import { sql } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
+import { TEMPLATE_REGISTRY, type TemplateKey } from '../../app/email-template/email-template.registry';
 import schema from '../schema';
 
 type SeedDatabase = NodePgDatabase<typeof schema>;
 
 const magicLinkEmailTemplate = {
-	key: 'auth_magic_link',
+	key: 'auth_magic_link' satisfies TemplateKey,
 	version: 1,
 	isActive: true,
+	variables: TEMPLATE_REGISTRY.auth_magic_link,
 	subject: 'Your secure sign-in link',
 	html: `
 <!doctype html>
@@ -71,9 +73,10 @@ If you did not request this email, you can safely ignore it.
 };
 
 const welcomeEmailTemplate = {
-	key: 'auth_welcome',
+	key: 'auth_welcome' satisfies TemplateKey,
 	version: 1,
 	isActive: true,
+	variables: TEMPLATE_REGISTRY.auth_welcome,
 	subject: 'Welcome to your account',
 	html: `
 <!doctype html>
@@ -112,9 +115,10 @@ Your account for {{email}} has been created successfully.
 };
 
 const accountApprovalEmailTemplate = {
-	key: 'auth_account_approval',
+	key: 'auth_account_approval' satisfies TemplateKey,
 	version: 1,
 	isActive: true,
+	variables: TEMPLATE_REGISTRY.auth_account_approval,
 	subject: 'Your account has been approved',
 	html: `
 <!doctype html>
@@ -156,9 +160,10 @@ Your account was approved by {{approvedByName}}. You can now sign in:
 };
 
 const invitationEmailTemplate = {
-	key: 'auth_invitation',
+	key: 'auth_invitation' satisfies TemplateKey,
 	version: 1,
 	isActive: true,
+	variables: TEMPLATE_REGISTRY.auth_invitation,
 	subject: 'You have been invited',
 	html: `
 <!doctype html>
@@ -201,9 +206,10 @@ Open the dashboard and use your email address to request a secure sign-in link:
 };
 
 const twoFactorAlertEmailTemplate = {
-	key: 'auth_two_factor_alert',
+	key: 'auth_two_factor_alert' satisfies TemplateKey,
 	version: 1,
 	isActive: true,
+	variables: TEMPLATE_REGISTRY.auth_two_factor_alert,
 	subject: 'Two-factor authentication {{eventLabel}}',
 	html: `
 <!doctype html>
@@ -266,6 +272,7 @@ export async function seedEmailTemplates(db: SeedDatabase): Promise<void> {
 					subject: template.subject,
 					html: template.html,
 					text: template.text,
+					variables: template.variables,
 					isActive: template.isActive,
 					updatedAt: sql`now()`,
 				},
