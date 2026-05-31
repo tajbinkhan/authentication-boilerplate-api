@@ -123,6 +123,19 @@ export class AuthController {
 				AppHelpers.accessTokenCookieConfig(this.configService),
 			);
 
+			if (result.user.is2faEnabled) {
+				response.cookie(
+					'requires-2fa',
+					'true',
+					AppHelpers.requires2faCookieConfig(this.configService),
+				);
+			} else {
+				response.clearCookie(
+					'requires-2fa',
+					AppHelpers.requires2faClearCookieConfig(this.configService),
+				);
+			}
+
 			await this.auditLogService.logAction({
 				actor: result.user,
 				action: 'LOGIN_SUCCESS',
@@ -148,6 +161,10 @@ export class AuthController {
 				'access-token',
 				AppHelpers.accessTokenClearCookieConfig(this.configService),
 			);
+			response.clearCookie(
+				'requires-2fa',
+				AppHelpers.requires2faClearCookieConfig(this.configService),
+			);
 			response.redirect(this.authService.getDashboardAccessRestrictionLoginUrl(restriction));
 		}
 	}
@@ -167,6 +184,19 @@ export class AuthController {
 			result.sessionToken,
 			AppHelpers.accessTokenCookieConfig(this.configService),
 		);
+
+		if (result.user.is2faEnabled) {
+			response.cookie(
+				'requires-2fa',
+				'true',
+				AppHelpers.requires2faCookieConfig(this.configService),
+			);
+		} else {
+			response.clearCookie(
+				'requires-2fa',
+				AppHelpers.requires2faClearCookieConfig(this.configService),
+			);
+		}
 
 		await this.auditLogService.logAction({
 			actor: result.user,
@@ -204,10 +234,15 @@ export class AuthController {
 			AppHelpers.accessTokenClearCookieConfig(this.configService),
 		);
 
+		request.res?.clearCookie(
+			'requires-2fa',
+			AppHelpers.requires2faClearCookieConfig(this.configService),
+		);
+
 		return createApiResponse(HttpStatus.OK, 'Logout successful', null);
 	}
 
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(PartialJwtAuthGuard)
 	@Get('2fa/status')
 	async getTwoFactorStatus(
 		@CurrentUser() user: UserWithoutPassword,
@@ -283,6 +318,11 @@ export class AuthController {
 			body.code,
 		);
 
+		request.res?.clearCookie(
+			'requires-2fa',
+			AppHelpers.requires2faClearCookieConfig(this.configService),
+		);
+
 		return createApiResponse(HttpStatus.OK, 'Two-factor verified successfully', result);
 	}
 
@@ -329,12 +369,17 @@ export class AuthController {
 				userAgent: userDeviceInfo.userAgent,
 			});
 
-			if (result.passwordRemoved) {
-				request.res?.clearCookie(
-					'access-token',
-					AppHelpers.accessTokenClearCookieConfig(this.configService),
-				);
-			}
+		request.res?.clearCookie(
+			'requires-2fa',
+			AppHelpers.requires2faClearCookieConfig(this.configService),
+		);
+
+		if (result.passwordRemoved) {
+			request.res?.clearCookie(
+				'access-token',
+				AppHelpers.accessTokenClearCookieConfig(this.configService),
+			);
+		}
 		}
 
 		const message = result.passwordRemoved
@@ -429,6 +474,10 @@ export class AuthController {
 				'access-token',
 				AppHelpers.accessTokenClearCookieConfig(this.configService),
 			);
+			request.res?.clearCookie(
+				'requires-2fa',
+				AppHelpers.requires2faClearCookieConfig(this.configService),
+			);
 		}
 
 		return createApiResponse(
@@ -508,6 +557,19 @@ export class AuthController {
 				accessToken,
 				AppHelpers.accessTokenCookieConfig(this.configService),
 			);
+
+			if (user.is2faEnabled) {
+				request.res?.cookie(
+					'requires-2fa',
+					'true',
+					AppHelpers.requires2faCookieConfig(this.configService),
+				);
+			} else {
+				request.res?.clearCookie(
+					'requires-2fa',
+					AppHelpers.requires2faClearCookieConfig(this.configService),
+				);
+			}
 
 			// Clear brute-force tracking on successful login
 			await BruteForceGuard.clearFailedAttempts(this.securityStore, loginDto.email, ip);
@@ -624,6 +686,19 @@ export class AuthController {
 				accessToken,
 				AppHelpers.accessTokenCookieConfig(this.configService),
 			);
+
+			if (user.is2faEnabled) {
+				request.res?.cookie(
+					'requires-2fa',
+					'true',
+					AppHelpers.requires2faCookieConfig(this.configService),
+				);
+			} else {
+				request.res?.clearCookie(
+					'requires-2fa',
+					AppHelpers.requires2faClearCookieConfig(this.configService),
+				);
+			}
 
 			// Clear brute-force tracking on successful login
 			await BruteForceGuard.clearFailedAttempts(this.securityStore, user.email, ip);

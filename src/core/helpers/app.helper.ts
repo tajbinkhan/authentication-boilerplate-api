@@ -99,4 +99,36 @@ export const AppHelpers = {
 			}),
 		};
 	},
+
+	requires2faCookieConfig(
+		configService: ConfigService<EnvType, true>,
+		maxAge: number = sessionTimeout,
+	): CookieOptions {
+		const cookieConfig = this.sameSiteCookieConfig(configService);
+
+		return {
+			httpOnly: true,
+			secure: cookieConfig.secure,
+			sameSite: cookieConfig.sameSite,
+			maxAge,
+			path: '/',
+			...(cookieConfig.domain && {
+				domain: cookieConfig.domain,
+			}),
+		};
+	},
+
+	requires2faClearCookieConfig(configService: ConfigService<EnvType, true>): CookieOptions {
+		const cookieConfig = this.sameSiteCookieConfig(configService);
+
+		return {
+			httpOnly: true,
+			secure: cookieConfig.secure,
+			sameSite: cookieConfig.sameSite,
+			path: '/',
+			...(cookieConfig.domain && {
+				domain: cookieConfig.domain,
+			}),
+		};
+	},
 } as const;
