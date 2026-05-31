@@ -252,7 +252,7 @@ export class AuthController {
 		return createApiResponse(HttpStatus.OK, 'Two-factor status fetched successfully', status);
 	}
 
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(PartialJwtAuthGuard)
 	@Post('2fa/setup/start')
 	@HttpCode(HttpStatus.OK)
 	async startTwoFactorSetup(
@@ -263,7 +263,7 @@ export class AuthController {
 		return createApiResponse(HttpStatus.OK, 'Two-factor setup started successfully', setup);
 	}
 
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(PartialJwtAuthGuard)
 	@Throttle({
 		short: { limit: 3, ttl: 60000 },
 		long: { limit: 10, ttl: 300000 },
@@ -272,10 +272,10 @@ export class AuthController {
 	@HttpCode(HttpStatus.OK)
 	async confirmTwoFactorSetup(
 		@CurrentUser() user: UserWithoutPassword,
-		@Request() request: ExpressRequest,
+		@Request() request: PartialAuthRequest,
 		@Body(new ZodValidationPipe(twoFactorCodeSchema)) body: TwoFactorCodeDto,
 	): Promise<ApiResponse<TwoFactorRecoveryCodesResponse>> {
-		const session = await this.getCurrentSession(user, request);
+		const session = this.getPartialAuthSession(request);
 		const result = await this.twoFactorService.confirmSetup(user, session, body.code);
 		const userDeviceInfo = this.sessionService.getSessionInfo(request);
 
