@@ -25,7 +25,7 @@ import type {
 	SmtpProviderListResponse,
 	SmtpProviderResponse,
 	TestConnectionResponse,
-} from './@types/smtp.types';
+} from './smtp.types';
 import {
 	type CreateSmtpProviderDto,
 	createSmtpProviderSchema,

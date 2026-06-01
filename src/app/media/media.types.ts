@@ -1,4 +1,4 @@
-import { MediaSchemaType } from '../../../database/types';
+import { MediaSchemaType } from '../../database/types';
 
 export type MediaDataType = Omit<MediaSchemaType, 'id' | 'publicId' | 'createdAt' | 'updatedAt'>;
 

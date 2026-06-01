@@ -1,4 +1,4 @@
-import type { UserManagementResponse, UserManagementRow } from './@types/users.types';
+import type { UserManagementResponse, UserManagementRow } from './users.types';
 
 export function mapUserManagementResponse(row: UserManagementRow): UserManagementResponse {
 	return {

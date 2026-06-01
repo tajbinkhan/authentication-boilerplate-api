@@ -5,8 +5,8 @@ import type {
 	EmailProvider,
 	SendEmailParams,
 	TestConnectionResult,
-} from '../interfaces/email-provider.interface';
-import type { ResendConfig } from '../@types/smtp.types';
+} from '../email-provider.interface';
+import type { ResendConfig } from '../smtp.types';
 
 export class ResendProvider implements EmailProvider {
 	readonly type = 'resend' as const;

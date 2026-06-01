@@ -1,6 +1,7 @@
 import type { ConfigService } from '@nestjs/config';
 import { randomInt } from 'crypto';
 import type { CookieOptions } from 'express';
+import { badRequestError } from '../errors/domain-error';
 import type { EnvType } from '../validators/env';
 import { sessionTimeout } from './constant.helper';
 
@@ -30,7 +31,7 @@ export const AppHelpers = {
 	 */
 	OTPGenerator(length: number = 4): string {
 		if (length < 4) {
-			throw new Error('The OTP length must be at least 4.');
+			throw badRequestError('The OTP length must be at least 4.');
 		}
 
 		const min = Math.pow(10, length - 1);

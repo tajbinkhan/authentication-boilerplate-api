@@ -14,7 +14,7 @@ import type {
 	EmailProvider,
 	EmailProviderType,
 	TestConnectionResult,
-} from './interfaces/email-provider.interface';
+} from './email-provider.interface';
 import { SmtpProvidersRepository } from './smtp-providers.repository';
 import { SmtpProvidersPolicy } from './smtp-providers.policy';
 import type {

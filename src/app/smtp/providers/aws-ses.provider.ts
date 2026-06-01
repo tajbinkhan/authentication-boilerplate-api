@@ -5,8 +5,8 @@ import type {
 	EmailProvider,
 	SendEmailParams,
 	TestConnectionResult,
-} from '../interfaces/email-provider.interface';
-import type { AwsSesConfig } from '../@types/smtp.types';
+} from '../email-provider.interface';
+import type { AwsSesConfig } from '../smtp.types';
 
 export class AwsSesProvider implements EmailProvider {
 	readonly type = 'aws-ses' as const;

@@ -2,7 +2,7 @@
 
 **Date:** May 31, 2026
 **Reference:** [`docs/fixes/architectural-compliance-audit.md`](./architectural-compliance-audit.md)
-**Total Violations:** 34
+**Total Violations:** 34 (14 resolved, 20 remaining)
 **Estimated Total Effort:** 5–7 engineering days
 
 ---
@@ -13,38 +13,51 @@ This document provides a mechanically executable, step-by-step plan to resolve a
 
 ### Phase Summary
 
-| Phase | Title | Violations Resolved | Effort | Risk |
-|-------|-------|---------------------|--------|------|
-| 1 | Quick Wins — Dead Code & Simple Fixes | #14, #16, #17, #18, #26, #29 | Low | Low |
-| 2 | Flatten Single-File Subfolders | #19–#25, #27 | Medium | Low |
-| 3 | Structural Relocation — Database, Crypto, Common | #1, #2, #5, #7, #11, #12, #13, #28 | High | High |
-| 4 | Repository Abstraction Layer | #3, #6 | High | Medium |
-| 5 | Response Validation with Zod | #4 | High | Medium |
-| 6 | Policy Layer & Auth Schema Consolidation | #8, #9, #15 | High | Medium |
-| 7 | Email Templates & Documentation | #10, #30 | Medium | Low |
+| Phase | Title | Violations Resolved | Effort | Risk | Status |
+|-------|-------|---------------------|--------|------|--------|
+| 1 | Quick Wins — Dead Code & Simple Fixes | #14, #16, #17, #18, #26, #29 | Low | Low | ✅ Completed |
+| 2 | Flatten Single-File Subfolders | #19–#25, #27 | Medium | Low | ✅ Completed |
+| 3 | Structural Relocation — Database, Crypto, Common | #1, #2, #5, #7, #11, #12, #13, #28 | High | High | Pending |
+| 4 | Repository Abstraction Layer | #3, #6 | High | Medium | Pending |
+| 5 | Response Validation with Zod | #4 | High | Medium | Pending |
+| 6 | Policy Layer & Auth Schema Consolidation | #8, #9, #15 | High | Medium | Pending |
+| 7 | Email Templates & Documentation | #10, #30 | Medium | Low | Pending |
 
 ### Dependency Graph
 
 ```
-Phase 1 ──→ Phase 2 ──→ Phase 3 ──→ Phase 4
-                                  ──→ Phase 5
-                                  ──→ Phase 6
-                                            ──→ Phase 7
+Phase 1 ✅ ──→ Phase 2 ✅ ──→ Phase 3 ──→ Phase 4
+                                         ──→ Phase 5
+                                         ──→ Phase 6
+                                                   ──→ Phase 7
 ```
 
-- Phase 1 must complete before Phase 2 (deletes `service.ts` before moves).
-- Phase 2 must complete before Phase 3 (flattens subfolders before bulk import rewrites).
+- ~~Phase 1 must complete before Phase 2 (deletes `service.ts` before moves).~~ ✅ Done
+- ~~Phase 2 must complete before Phase 3 (flattens subfolders before bulk import rewrites).~~ ✅ Done
 - Phase 3 must complete before Phases 4, 5, and 6 (establishes canonical paths).
 - Phases 4, 5, and 6 can run in parallel after Phase 3.
 - Phase 7 can run in parallel with Phases 4–6 but is lowest priority.
 
 ---
 
-## Phase 1: Quick Wins — Dead Code & Simple Fixes
+## Phase 1: Quick Wins — Dead Code & Simple Fixes ✅ COMPLETED
 
+**Status:** All 6 steps completed and verified on May 31, 2026.
 **Risk:** Low
 **Effort:** Low (30 minutes)
 **Violations Resolved:** #14, #16, #17, #18, #26, #29
+
+### Completion Log
+
+| Step | Action | Status |
+|------|--------|--------|
+| 1.1 | Removed commented-out MongoDB import and `clearMongoDatabase()` method from `src/database/clean.ts` (lines 4, 16-36, 81, 84) | ✅ Done |
+| 1.2 | Removed commented-out phone validation regex from `src/core/validators/common.schema.ts` (lines 279-285) | ✅ Done |
+| 1.3 | Replaced `npm run` with `pnpm run` in `src/database/clean.ts:86` | ✅ Done |
+| 1.4 | Deleted empty directories `src/app/auth/errors/` and `src/app/auth/repositories/` (`controllers/` already absent) | ✅ Done |
+| 1.5 | Replaced `throw new Error(...)` with `throw badRequestError(...)` in `src/core/helpers/app.helper.ts:33`, added `badRequestError` import | ✅ Done |
+| 1.6 | Deleted dead/unused `src/database/service.ts` (`DrizzleService` abstract class) — verified no imports or extends references | ✅ Done |
+| 1.7 | Quality gate passed: `pnpm tsc --noEmit` (0 errors), `pnpm lint` (0 warnings), `pnpm build` (147 files, 0 issues) | ✅ Passed |
 
 ### Step 1.1: Remove Commented-Out MongoDB Code from `clean.ts`
 
@@ -160,11 +173,26 @@ All three must pass with zero errors.
 
 ---
 
-## Phase 2: Flatten Single-File Subfolders
+## Phase 2: Flatten Single-File Subfolders ✅ COMPLETED
 
+**Status:** All 7 steps completed and verified on May 31, 2026.
 **Risk:** Low
 **Effort:** Medium (1–2 hours)
 **Violations Resolved:** #19, #20, #21, #22, #23, #24, #25, #27
+
+### Completion Log
+
+| Step | Action | Status |
+|------|--------|--------|
+| 2.1 | Moved `src/app/email-logs/@types/email-log.types.ts` → `src/app/email-logs/email-log.types.ts`, deleted `@types/`, updated 2 consumer imports | ✅ Done |
+| 2.2 | Moved `src/app/users/@types/users.types.ts` → `src/app/users/users.types.ts`, deleted `@types/`, updated 4 consumer imports + internal `database/types` path | ✅ Done |
+| 2.3 | Moved `src/app/email-template/@types/email-template.types.ts` → `src/app/email-template/email-template.types.ts`, deleted `@types/`, updated 1 consumer import + internal `email-template.registry` path | ✅ Done |
+| 2.4 | Moved `src/app/media/@types/media.types.ts` → `src/app/media/media.types.ts`, deleted `@types/`, updated 4 consumer imports + internal `database/types` path | ✅ Done |
+| 2.5 | Moved `src/app/media/services/cloudinary.service.ts` → `src/app/media/cloudinary.service.ts`, deleted `services/`, updated 4 consumer imports (media.service, media.providers, auth.service, auth.providers) | ✅ Done |
+| 2.6 | Moved `src/app/smtp/@types/smtp.types.ts` → `src/app/smtp/smtp.types.ts`, deleted `@types/`, updated 6 consumer imports + internal `email-provider.interface` path | ✅ Done |
+| 2.7 | Moved `src/app/smtp/interfaces/email-provider.interface.ts` → `src/app/smtp/email-provider.interface.ts`, deleted `interfaces/`, updated 8 consumer imports | ✅ Done |
+| 2.8 | `src/@types/express.d.ts` — deferred to Phase 3 Step 3.7 (moves with `src/common/` creation) | ⏭️ Deferred |
+| 2.9 | Quality gate passed: `pnpm tsc --noEmit` (0 errors), `pnpm lint` (0 warnings), `pnpm build` (147 files, 0 issues) | ✅ Passed |
 
 For each sub-step: move the file, delete the now-empty directory, update all import paths.
 
@@ -1333,9 +1361,9 @@ After all 7 phases are complete, verify:
 - [ ] Every `*.repository.ts` has a corresponding `*.repository.interface.ts`
 - [ ] Every controller method ends with `ResponseSchema.parse(data)`
 - [ ] Every feature module with authorization logic has a `*.policy.ts` file
-- [ ] No single-file subfolders exist in any feature module
-- [ ] No empty directories exist in `src/app/auth/`
-- [ ] No commented-out dead code exists in `clean.ts` or `common.schema.ts`
-- [ ] No `npm run` references exist anywhere in the codebase
+- [x] No single-file subfolders exist in any feature module — ✅ Phase 2 (except `src/@types/` deferred to Phase 3)
+- [x] No empty directories exist in `src/app/auth/` — ✅ Phase 1
+- [x] No commented-out dead code exists in `clean.ts` or `common.schema.ts` — ✅ Phase 1
+- [x] No `npm run` references exist anywhere in the codebase — ✅ Phase 1
 - [ ] All `docs/api/*.md` files contain all 11 required sections
 - [ ] `docs/api/email-logs.md` and `docs/api/email-template.md` exist

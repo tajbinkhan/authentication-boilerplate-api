@@ -7,7 +7,7 @@ import { DATABASE_CONNECTION } from '../../database/connection';
 import { orderByColumn } from '../../database/helpers';
 import schema from '../../database/schema';
 import type { UserSchemaType } from '../../database/types';
-import type { UserManagementRow } from './@types/users.types';
+import type { UserManagementRow } from './users.types';
 import type { UsersListQueryDto } from './users.schema';
 
 export type UsersDatabase = NodePgDatabase<typeof schema>;

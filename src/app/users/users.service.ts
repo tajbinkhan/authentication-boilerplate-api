@@ -20,7 +20,7 @@ import type {
 	ResetUserTwoFactorResponse,
 	UserListResponse,
 	UserManagementResponse,
-} from './@types/users.types';
+} from './users.types';
 import { mapUserManagementResponse } from './users.mapper';
 import { UsersPolicy } from './users.policy';
 import { UsersRepository } from './users.repository';

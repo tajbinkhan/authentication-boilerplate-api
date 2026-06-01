@@ -8,7 +8,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import type {
 	EmailTemplateListResponse,
 	EmailTemplateResponse,
-} from './@types/email-template.types';
+} from './email-template.types';
 import {
 	type EmailTemplateListQueryDto,
 	emailTemplateListQuerySchema,

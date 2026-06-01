@@ -1,4 +1,4 @@
-import type { EmailProviderType } from '../interfaces/email-provider.interface';
+import type { EmailProviderType } from './email-provider.interface';
 
 export interface SmtpProviderResponse {
 	id: string;

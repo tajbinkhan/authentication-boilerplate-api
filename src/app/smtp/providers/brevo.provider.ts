@@ -5,8 +5,8 @@ import type {
 	EmailProvider,
 	SendEmailParams,
 	TestConnectionResult,
-} from '../interfaces/email-provider.interface';
-import type { BrevoConfig } from '../@types/smtp.types';
+} from '../email-provider.interface';
+import type { BrevoConfig } from '../smtp.types';
 
 export class BrevoProvider implements EmailProvider {
 	readonly type = 'brevo' as const;

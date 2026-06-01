@@ -6,7 +6,7 @@ import { DATABASE_CONNECTION } from '../../database/connection';
 import { orderByColumn } from '../../database/helpers';
 import schema from '../../database/schema';
 import type { MediaSchemaType } from '../../database/types';
-import type { MediaDataType } from './@types/media.types';
+import type { MediaDataType } from './media.types';
 import { type MediaDto, type MediaListQueryDto } from './media.schema';
 import type { MediaDeleteRow, MediaResponseRow } from './media.mapper';
 

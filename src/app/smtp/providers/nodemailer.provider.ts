@@ -6,8 +6,8 @@ import type {
 	EmailProvider,
 	SendEmailParams,
 	TestConnectionResult,
-} from '../interfaces/email-provider.interface';
-import type { NodemailerConfig } from '../@types/smtp.types';
+} from '../email-provider.interface';
+import type { NodemailerConfig } from '../smtp.types';
 
 export class NodemailerProvider implements EmailProvider {
 	readonly type = 'nodemailer' as const;

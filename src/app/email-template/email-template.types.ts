@@ -1,4 +1,4 @@
-import type { TemplateVariableDescriptor } from '../email-template.registry';
+import type { TemplateVariableDescriptor } from './email-template.registry';
 
 export interface EmailTemplateResponse {
 	publicId: string;

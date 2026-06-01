@@ -18,7 +18,7 @@ import { ZodValidationPipe } from '../../core/pipes/zod-validation.pipe';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { EmailDispatcherService } from '../smtp/email-dispatcher.service';
 import { SmtpProvidersRepository } from '../smtp/smtp-providers.repository';
-import type { EmailLogListResponse, EmailLogResponse } from './@types/email-log.types';
+import type { EmailLogListResponse, EmailLogResponse } from './email-log.types';
 import {
 	type EmailLogsListQueryDto,
 	emailLogsListQuerySchema,

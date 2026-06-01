@@ -28,7 +28,7 @@ import type {
 	ResetUserTwoFactorResponse,
 	UserListResponse,
 	UserManagementResponse,
-} from './@types/users.types';
+} from './users.types';
 import {
 	type CreateUserDto,
 	createUserSchema,

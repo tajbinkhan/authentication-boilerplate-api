@@ -6,7 +6,7 @@ import type { SmtpProviderSchemaType } from '../../database/types';
 import type { TemplateKey, TemplateVariableMap } from '../email-template/email-template.registry';
 import { EmailTemplateService } from '../email-template/email-template.service';
 import { EmailLogsService } from '../email-logs/email-logs.service';
-import type { EmailProvider, SendEmailParams } from './interfaces/email-provider.interface';
+import type { EmailProvider, SendEmailParams } from './email-provider.interface';
 import { AwsSesProvider } from './providers/aws-ses.provider';
 import { BrevoProvider } from './providers/brevo.provider';
 import { NodemailerProvider } from './providers/nodemailer.provider';

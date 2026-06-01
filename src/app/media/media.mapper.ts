@@ -5,7 +5,7 @@ import type {
 	MediaDataType,
 	MediaDeleteResponseType,
 	MediaResponseType,
-} from './@types/media.types';
+} from './media.types';
 
 export type MediaResponseRow = Pick<
 	MediaSchemaType,

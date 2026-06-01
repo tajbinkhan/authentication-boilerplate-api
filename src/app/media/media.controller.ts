@@ -22,7 +22,7 @@ import { ApiResponse, createApiResponse } from '../../core/interceptors/api-resp
 import { ZodValidationPipe } from '../../core/pipes/zod-validation.pipe';
 import type { UserWithoutPassword } from '../auth/core/auth.types';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { MediaResponseType } from './@types/media.types';
+import { MediaResponseType } from './media.types';
 import { FILE_SIZE_LIMIT, singleFileSchema, ZodFileValidationPipe } from './media.pipe';
 import {
 	type MediaDto,

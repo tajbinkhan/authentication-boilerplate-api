@@ -276,14 +276,6 @@ export const validateUrl = (name: string) => baseUrl(name, { max: 2048 });
 
 export const validateUUID = (name: string) => baseUUID(name);
 
-// export const phoneWithCountryCodeRegex = /^\+?[1-9]\d{1,14}$/;
-// export const validatePhoneNumber = (name: string) =>
-// 	baseString(name, { min: 1 })
-// 		.refine(value => phoneWithCountryCodeRegex.test(value), {
-// 			error: zodMessages.error.invalid.invalidPhoneNumber(name),
-// 		})
-// 		.transform(value => value.trim());
-
 export const validatePhoneNumber = (name = 'Phone') =>
 	baseString(name, { min: 1 })
 		.trim()

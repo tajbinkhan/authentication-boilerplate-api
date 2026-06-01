@@ -16,7 +16,7 @@ import { magicLinkTimeout, sessionTimeout } from '../../../core/helpers/constant
 import { EnvType } from '../../../core/validators/env';
 import { CryptoService } from '../../../crypto/crypto.service';
 import { AuditLogService } from '../../audit-log/audit-log.service';
-import { CloudinaryImageService } from '../../media/services/cloudinary.service';
+import { CloudinaryImageService } from '../../media/cloudinary.service';
 import { SystemService } from '../../system/system.service';
 import { MagicLinkEmailService } from '../services/magic-link-email.service';
 import { WelcomeEmailService } from '../services/welcome-email.service';
