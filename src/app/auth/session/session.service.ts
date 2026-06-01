@@ -3,8 +3,8 @@ import type { Request } from 'express';
 import { UAParser } from 'ua-parser-js';
 
 import { notFoundError, unauthorizedError } from '../../../core/errors/domain-error';
-import { sessionRenewalThreshold, sessionTimeout } from '../../../core/helpers/constant.helper';
-import type { SessionSchemaType } from '../../../database/types';
+import { sessionRenewalThreshold, sessionTimeout } from '../../../common/helpers/constant.helper';
+import type { SessionSchemaType } from '../../../core/database/types';
 import { mapSessionResponse } from './session.mapper';
 import { SessionRepository } from './session.repository';
 import type { SessionListQueryDto } from './session.schema';

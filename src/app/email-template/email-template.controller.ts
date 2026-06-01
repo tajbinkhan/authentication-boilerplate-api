@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Param, Patch, Query, UseGuards } from '@nestjs/common';
 
-import { Roles } from '../../core/decorators/roles.decorator';
-import { RolesGuard } from '../../core/guards/roles.guard';
-import { ApiResponse, createApiResponse } from '../../core/interceptors/api-response.interceptor';
-import { ZodValidationPipe } from '../../core/pipes/zod-validation.pipe';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { ApiResponse, createApiResponse } from '../../common/interceptors/api-response.interceptor';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import type {
 	EmailTemplateListResponse,
@@ -17,7 +17,7 @@ import { type UpdateEmailTemplateDto, updateEmailTemplateSchema } from './email-
 import { EmailTemplateService } from './email-template.service';
 
 function toResponse(
-	template: import('../../database/types').EmailTemplateSchemaType,
+	template: import('../../core/database/types').EmailTemplateSchemaType,
 ): EmailTemplateResponse {
 	return {
 		publicId: template.publicId,

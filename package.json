@@ -24,8 +24,8 @@
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:push": "drizzle-kit push",
-		"db:clear": "ts-node src/database/clean.ts",
-		"db:seed": "ts-node src/database/seed.ts"
+		"db:clear": "ts-node src/core/database/clean.ts",
+		"db:seed": "ts-node src/core/database/seed.ts"
 	},
 	"dependencies": {
 		"@aws-sdk/client-ses": "^3.1053.0",

@@ -2,7 +2,7 @@
 
 **Date:** May 31, 2026
 **Reference:** [`docs/fixes/architectural-compliance-audit.md`](./architectural-compliance-audit.md)
-**Total Violations:** 34 (14 resolved, 20 remaining)
+**Total Violations:** 34 (22 resolved, 12 remaining)
 **Estimated Total Effort:** 5–7 engineering days
 
 ---
@@ -17,7 +17,7 @@ This document provides a mechanically executable, step-by-step plan to resolve a
 |-------|-------|---------------------|--------|------|--------|
 | 1 | Quick Wins — Dead Code & Simple Fixes | #14, #16, #17, #18, #26, #29 | Low | Low | ✅ Completed |
 | 2 | Flatten Single-File Subfolders | #19–#25, #27 | Medium | Low | ✅ Completed |
-| 3 | Structural Relocation — Database, Crypto, Common | #1, #2, #5, #7, #11, #12, #13, #28 | High | High | Pending |
+| 3 | Structural Relocation — Database, Crypto, Common | #1, #2, #5, #7, #11, #12, #13, #28 | High | High | ✅ Completed |
 | 4 | Repository Abstraction Layer | #3, #6 | High | Medium | Pending |
 | 5 | Response Validation with Zod | #4 | High | Medium | Pending |
 | 6 | Policy Layer & Auth Schema Consolidation | #8, #9, #15 | High | Medium | Pending |
@@ -26,15 +26,15 @@ This document provides a mechanically executable, step-by-step plan to resolve a
 ### Dependency Graph
 
 ```
-Phase 1 ✅ ──→ Phase 2 ✅ ──→ Phase 3 ──→ Phase 4
-                                         ──→ Phase 5
-                                         ──→ Phase 6
-                                                   ──→ Phase 7
+Phase 1 ✅ ──→ Phase 2 ✅ ──→ Phase 3 ✅ ──→ Phase 4
+                                              ──→ Phase 5
+                                              ──→ Phase 6
+                                                        ──→ Phase 7
 ```
 
 - ~~Phase 1 must complete before Phase 2 (deletes `service.ts` before moves).~~ ✅ Done
 - ~~Phase 2 must complete before Phase 3 (flattens subfolders before bulk import rewrites).~~ ✅ Done
-- Phase 3 must complete before Phases 4, 5, and 6 (establishes canonical paths).
+- ~~Phase 3 must complete before Phases 4, 5, and 6 (establishes canonical paths).~~ ✅ Done
 - Phases 4, 5, and 6 can run in parallel after Phase 3.
 - Phase 7 can run in parallel with Phases 4–6 but is lowest priority.
 
@@ -362,13 +362,28 @@ pnpm build
 
 ---
 
-## Phase 3: Structural Relocation — Database, Crypto, Common
+## Phase 3: Structural Relocation — Database, Crypto, Common ✅ COMPLETED
 
+**Status:** All 8 steps completed and verified on May 31, 2026.
 **Risk:** High
 **Effort:** High (3–4 hours)
 **Violations Resolved:** #1, #2, #5, #7, #11, #12, #13, #28
 
-This phase must be executed atomically in a single commit. All sub-steps are interdependent.
+### Completion Log
+
+| Step | Action | Status |
+|------|--------|--------|
+| 3.1 | Moved `src/database/` → `src/core/database/` (8 files + seeds/), updated 80+ imports across all feature modules, `app.module.ts`, `postgres-store.service.ts`, `express.d.ts` | ✅ Done |
+| 3.2 | Moved `src/models/drizzle/*.model.ts` → `src/core/database/schema/*.schema.ts` (10 files renamed), updated cross-schema imports (`.model` → `.schema`), updated `schema.ts` barrel and `types.ts`, deleted `src/models/` | ✅ Done |
+| 3.3 | Updated `drizzle.config.ts` schema path from `./src/models/drizzle` to `./src/core/database/schema` | ✅ Done |
+| 3.4 | Updated `update-schema.mjs` — models dir, schema file path, file extension filter (`.model.ts` → `.schema.ts`), import path template | ✅ Done |
+| 3.5 | Updated `package.json` scripts: `db:clear` and `db:seed` now point to `src/core/database/` | ✅ Done |
+| 3.6 | Moved `src/crypto/` → `src/core/crypto/` (2 files), updated 8 consumer imports across auth, smtp modules and `app.module.ts` | ✅ Done |
+| 3.7 | Split `src/core/` into `src/common/` + `src/core/` — moved 7 subdirectories (decorators, filters, guards, pipes, interceptors, middlewares, helpers) to `src/common/`, moved `src/@types/express.d.ts` → `src/common/@types/`, updated all cross-references in guards/helpers/decorators/pipes/middlewares, updated `main.ts` (4 imports), `app.module.ts` (2 imports), and all 10+ feature controllers | ✅ Done |
+| 3.8 | Moved `src/app.controller.ts` (770 lines) into `src/app/status/status.controller.ts` + created `status.module.ts`, updated `app.module.ts` to import `StatusModule`, deleted root-level controller | ✅ Done |
+| 3.9 | Quality gate passed: `pnpm tsc --noEmit` (0 errors), `pnpm lint` (0 warnings), `pnpm build` (148 files, 0 issues) | ✅ Passed |
+
+This phase was executed atomically in a single commit. All sub-steps are interdependent.
 
 ### Step 3.1: Move `src/database/` → `src/core/database/`
 
@@ -1347,21 +1362,21 @@ After all 7 phases are complete, verify:
 - [ ] `pnpm tsc --noEmit` passes with zero errors
 - [ ] `pnpm lint` passes with zero warnings
 - [ ] `pnpm build` completes successfully
-- [ ] `src/models/` directory no longer exists
-- [ ] `src/database/` directory no longer exists
-- [ ] `src/crypto/` directory no longer exists at root level
-- [ ] `src/@types/` directory no longer exists at root level
-- [ ] `src/app.controller.ts` no longer exists at root level
-- [ ] `src/common/` exists with decorators, filters, guards, pipes, interceptors, middlewares, helpers
-- [ ] `src/core/` contains only: config, crypto, database, errors, logging, security-store, validators
-- [ ] `src/core/database/schema/` contains all 10 `*.schema.ts` files
-- [ ] `drizzle.config.ts` points to `./src/core/database/schema`
-- [ ] `update-schema.mjs` points to correct paths and file extensions
-- [ ] `package.json` scripts reference `src/core/database/` paths
+- [x] `src/models/` directory no longer exists — ✅ Phase 3
+- [x] `src/database/` directory no longer exists — ✅ Phase 3
+- [x] `src/crypto/` directory no longer exists at root level — ✅ Phase 3
+- [x] `src/@types/` directory no longer exists at root level — ✅ Phase 3
+- [x] `src/app.controller.ts` no longer exists at root level — ✅ Phase 3
+- [x] `src/common/` exists with decorators, filters, guards, pipes, interceptors, middlewares, helpers — ✅ Phase 3
+- [x] `src/core/` contains only: crypto, database, errors, logging, security-store, validators — ✅ Phase 3
+- [x] `src/core/database/schema/` contains all 10 `*.schema.ts` files — ✅ Phase 3
+- [x] `drizzle.config.ts` points to `./src/core/database/schema` — ✅ Phase 3
+- [x] `update-schema.mjs` points to correct paths and file extensions — ✅ Phase 3
+- [x] `package.json` scripts reference `src/core/database/` paths — ✅ Phase 3
 - [ ] Every `*.repository.ts` has a corresponding `*.repository.interface.ts`
 - [ ] Every controller method ends with `ResponseSchema.parse(data)`
 - [ ] Every feature module with authorization logic has a `*.policy.ts` file
-- [x] No single-file subfolders exist in any feature module — ✅ Phase 2 (except `src/@types/` deferred to Phase 3)
+- [x] No single-file subfolders exist in any feature module — ✅ Phase 2 + Phase 3 (`src/@types/` moved to `src/common/@types/`)
 - [x] No empty directories exist in `src/app/auth/` — ✅ Phase 1
 - [x] No commented-out dead code exists in `clean.ts` or `common.schema.ts` — ✅ Phase 1
 - [x] No `npm run` references exist anywhere in the codebase — ✅ Phase 1

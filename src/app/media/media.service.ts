@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { notFoundError, unprocessableError } from '../../core/errors/domain-error';
-import { PaginatedResponse } from '../../core/interceptors/api-response.interceptor';
+import { PaginatedResponse } from '../../common/interceptors/api-response.interceptor';
 import type { MediaDataType, MediaResponseType } from './media.types';
 import { mapMediaDeleteResponse, mapMediaResponse, mapUploadToMediaData } from './media.mapper';
 import { MEDIA_CLOUDINARY_SERVICE } from './media.providers';

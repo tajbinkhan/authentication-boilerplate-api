@@ -1,6 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 
-import { DatabaseModule } from '../../database/database.module';
+import { DatabaseModule } from '../../core/database/database.module';
 import { SmtpModule } from '../smtp/smtp.module';
 import { EmailLogsController } from './email-logs.controller';
 import { EmailLogsRepository } from './email-logs.repository';

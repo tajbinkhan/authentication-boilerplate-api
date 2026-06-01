@@ -5,9 +5,9 @@ import type { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { twoFactorRequiredError, unauthorizedError } from '../../../core/errors/domain-error';
-import { AppHelpers } from '../../../core/helpers/app.helper';
+import { AppHelpers } from '../../../common/helpers/app.helper';
 import { EnvType } from '../../../core/validators/env';
-import { CryptoService } from '../../../crypto/crypto.service';
+import { CryptoService } from '../../../core/crypto/crypto.service';
 import { AuthService } from '../core/auth.service';
 import { SessionService } from '../session/session.service';
 

@@ -2,9 +2,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import { eq, sql } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
-import { DATABASE_CONNECTION } from '../../database/connection';
-import schema from '../../database/schema';
-import type { SystemSettingsSchemaType } from '../../database/types';
+import { DATABASE_CONNECTION } from '../../core/database/connection';
+import schema from '../../core/database/schema';
+import type { SystemSettingsSchemaType } from '../../core/database/types';
 
 export type SystemDatabase = NodePgDatabase<typeof schema>;
 export type SystemDbClient = Pick<SystemDatabase, 'query' | 'insert' | 'update' | 'delete'>;

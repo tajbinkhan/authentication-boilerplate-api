@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { DiscoveryModule, APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { AppController } from './app.controller';
 import { AuditLogModule } from './app/audit-log/audit-log.module';
 import { AuthModule } from './app/auth/auth.module';
 import { CsrfModule } from './app/csrf/csrf.module';
@@ -11,11 +10,12 @@ import { MediaModule } from './app/media/media.module';
 import { UsersModule } from './app/users/users.module';
 import { SystemModule } from './app/system/system.module';
 import { SmtpModule } from './app/smtp/smtp.module';
-import { ConfigurableThrottlerGuard } from './core/guards/configurable-throttler.guard';
-import { ZodValidationPipe } from './core/pipes/zod-validation.pipe';
+import { StatusModule } from './app/status/status.module';
+import { ConfigurableThrottlerGuard } from './common/guards/configurable-throttler.guard';
+import { ZodValidationPipe } from './common/pipes/zod-validation.pipe';
 import { validateEnv } from './core/validators/env';
-import { CryptoModule } from './crypto/crypto.module';
-import { DatabaseModule } from './database/database.module';
+import { CryptoModule } from './core/crypto/crypto.module';
+import { DatabaseModule } from './core/database/database.module';
 import { SecurityStoreModule } from './core/security-store/security-store.module';
 
 @Module({
@@ -51,8 +51,8 @@ import { SecurityStoreModule } from './core/security-store/security-store.module
 		SystemModule,
 		SmtpModule,
 		HealthModule,
+		StatusModule,
 	],
-	controllers: [AppController],
 	providers: [
 		{
 			provide: APP_GUARD,

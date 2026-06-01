@@ -1,4 +1,4 @@
-import type { SessionSchemaType } from '../../../database/types';
+import type { SessionSchemaType } from '../../../core/database/types';
 
 export type SessionDataType = Omit<
 	SessionSchemaType,

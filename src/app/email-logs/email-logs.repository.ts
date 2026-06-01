@@ -3,10 +3,10 @@ import type { SQL } from 'drizzle-orm';
 import { and, count, desc, eq, gte, lte } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
-import { DATABASE_CONNECTION } from '../../database/connection';
-import { orderByColumn } from '../../database/helpers';
-import schema from '../../database/schema';
-import type { EmailLogSchemaType } from '../../database/types';
+import { DATABASE_CONNECTION } from '../../core/database/connection';
+import { orderByColumn } from '../../core/database/helpers';
+import schema from '../../core/database/schema';
+import type { EmailLogSchemaType } from '../../core/database/types';
 import type { EmailLogsListQueryDto } from './email-logs.schema';
 
 export type EmailLogDatabase = NodePgDatabase<typeof schema>;

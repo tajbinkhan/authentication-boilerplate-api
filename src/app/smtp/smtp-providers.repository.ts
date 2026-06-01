@@ -3,10 +3,10 @@ import type { SQL } from 'drizzle-orm';
 import { and, asc, count, desc, eq, gte, ilike, lte, or } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
-import { DATABASE_CONNECTION } from '../../database/connection';
-import { orderByColumn } from '../../database/helpers';
-import schema from '../../database/schema';
-import type { SmtpProviderSchemaType } from '../../database/types';
+import { DATABASE_CONNECTION } from '../../core/database/connection';
+import { orderByColumn } from '../../core/database/helpers';
+import schema from '../../core/database/schema';
+import type { SmtpProviderSchemaType } from '../../core/database/types';
 import type { SmtpProvidersListQueryDto } from './smtp-providers.schema';
 
 export type SmtpProvidersDatabase = NodePgDatabase<typeof schema>;

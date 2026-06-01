@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { badGatewayError } from '../../../core/errors/domain-error';
-import { magicLinkTimeout } from '../../../core/helpers/constant.helper';
+import { magicLinkTimeout } from '../../../common/helpers/constant.helper';
 import { TEMPLATE_KEYS } from '../../email-template/email-template.registry';
 import { EmailDispatcherService } from '../../smtp/email-dispatcher.service';
 

@@ -7,7 +7,7 @@ import {
 	isDatabaseUniqueViolation,
 	notFoundError,
 } from '../../core/errors/domain-error';
-import type { UserSchemaType } from '../../database/types';
+import type { UserSchemaType } from '../../core/database/types';
 import type { UserWithoutPassword } from '../auth/core/auth.types';
 import { ApprovalEmailService } from '../auth/services/approval-email.service';
 import { InvitationEmailService } from '../auth/services/invitation-email.service';

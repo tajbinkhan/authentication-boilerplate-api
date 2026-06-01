@@ -15,11 +15,11 @@ import {
 } from '@nestjs/common';
 import type { Request as ExpressRequest } from 'express';
 
-import { CurrentUser } from '../../core/decorators/current-user.decorator';
-import { Roles } from '../../core/decorators/roles.decorator';
-import { RolesGuard } from '../../core/guards/roles.guard';
-import { ApiResponse, createApiResponse } from '../../core/interceptors/api-response.interceptor';
-import { ZodValidationPipe } from '../../core/pipes/zod-validation.pipe';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { ApiResponse, createApiResponse } from '../../common/interceptors/api-response.interceptor';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import type { UserWithoutPassword } from '../auth/core/auth.types';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import type {

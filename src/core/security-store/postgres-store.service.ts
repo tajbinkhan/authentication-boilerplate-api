@@ -2,8 +2,8 @@ import { Inject, Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { and, eq, gt, sql } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
-import { DATABASE_CONNECTION } from '../../database/connection';
-import schema from '../../database/schema';
+import { DATABASE_CONNECTION } from '../database/connection';
+import schema from '../database/schema';
 import type { ISecurityStore } from './security-store.interface';
 
 type SecurityDb = NodePgDatabase<typeof schema>;

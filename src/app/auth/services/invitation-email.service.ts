@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import type { EnvType } from '../../../core/validators/env';
-import type { RoleTypeEnum } from '../../../database/types';
+import type { RoleTypeEnum } from '../../../core/database/types';
 import { TEMPLATE_KEYS } from '../../email-template/email-template.registry';
 import { EmailDispatcherService } from '../../smtp/email-dispatcher.service';
 

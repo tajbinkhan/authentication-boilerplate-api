@@ -1,4 +1,4 @@
-import type { SmtpProviderSchemaType } from '../../database/types';
+import type { SmtpProviderSchemaType } from '../../core/database/types';
 import type { EmailProviderType } from './email-provider.interface';
 import type { SmtpProviderResponse } from './smtp.types';
 

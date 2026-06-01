@@ -3,10 +3,10 @@ import type { SQL } from 'drizzle-orm';
 import { and, asc, count, desc, eq, gte, ilike, inArray, lte, or, sql } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
-import { DATABASE_CONNECTION } from '../../database/connection';
-import { orderByColumn } from '../../database/helpers';
-import schema from '../../database/schema';
-import type { UserSchemaType } from '../../database/types';
+import { DATABASE_CONNECTION } from '../../core/database/connection';
+import { orderByColumn } from '../../core/database/helpers';
+import schema from '../../core/database/schema';
+import type { UserSchemaType } from '../../core/database/types';
 import type { UserManagementRow } from './users.types';
 import type { UsersListQueryDto } from './users.schema';
 

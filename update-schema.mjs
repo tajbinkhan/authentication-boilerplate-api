@@ -1,8 +1,8 @@
 /**
  * update‑schema.mjs
  *
- * This script auto‐generates src/database/schema.ts
- * by importing and spreading every *.model.ts from src/models/drizzle.
+ * This script auto‐generates src/core/database/schema.ts
+ * by importing and spreading every *.schema.ts from src/core/database/schema.
  */
 import { promises as fs } from 'fs';
 import path from 'path';
@@ -11,19 +11,19 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const modelsDir = path.resolve(__dirname, 'src', 'models', 'drizzle');
-const schemaFile = path.resolve(__dirname, 'src', 'database', 'schema.ts');
+const modelsDir = path.resolve(__dirname, 'src', 'core', 'database', 'schema');
+const schemaFile = path.resolve(__dirname, 'src', 'core', 'database', 'schema.ts');
 
 console.log('Models directory:', modelsDir);
 console.log('Schema file path:', schemaFile);
 
 async function getModelFiles() {
 	const files = await fs.readdir(modelsDir);
-	return files.filter(f => f.endsWith('.model.ts'));
+	return files.filter(f => f.endsWith('.schema.ts'));
 }
 
 function getPascalSchemaName(modelFile) {
-	const base = modelFile.replace(/\.model\.ts$/, '');
+	const base = modelFile.replace(/\.schema\.ts$/, '');
 	return (
 		base
 			.split(/[-_]/)
@@ -50,7 +50,7 @@ async function updateSchema() {
 		const importLines = modelFiles
 			.map(f => {
 				const name = getPascalSchemaName(f);
-				const importPath = `../models/drizzle/${f.replace(/\.ts$/, '')}`;
+				const importPath = `./schema/${f.replace(/\.ts$/, '')}`;
 				return `import * as ${name} from '${importPath}';`;
 			})
 			.join('\n');

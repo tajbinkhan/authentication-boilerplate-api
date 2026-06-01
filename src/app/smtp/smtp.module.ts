@@ -1,7 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 
-import { CryptoModule } from '../../crypto/crypto.module';
-import { DatabaseModule } from '../../database/database.module';
+import { CryptoModule } from '../../core/crypto/crypto.module';
+import { DatabaseModule } from '../../core/database/database.module';
 import { AuditLogModule } from '../audit-log/audit-log.module';
 import { EmailTemplateModule } from '../email-template/email-template.module';
 import { EmailLogsModule } from '../email-logs/email-logs.module';

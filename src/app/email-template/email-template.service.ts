@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import type { EmailTemplateSchemaType } from '../../database/types';
+import type { EmailTemplateSchemaType } from '../../core/database/types';
 import type { EmailTemplateListQueryDto } from './email-template-list.schema';
 import { notFoundError } from '../../core/errors/domain-error';
 import {

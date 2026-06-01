@@ -1,6 +1,6 @@
 import { Injectable, type OnModuleInit } from '@nestjs/common';
 import { SystemRepository } from './system.repository';
-import type { SystemSettingsSchemaType } from '../../database/types';
+import type { SystemSettingsSchemaType } from '../../core/database/types';
 
 @Injectable()
 export class SystemService implements OnModuleInit {

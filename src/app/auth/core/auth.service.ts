@@ -12,9 +12,9 @@ import {
 	notFoundError,
 	unauthorizedError,
 } from '../../../core/errors/domain-error';
-import { magicLinkTimeout, sessionTimeout } from '../../../core/helpers/constant.helper';
+import { magicLinkTimeout, sessionTimeout } from '../../../common/helpers/constant.helper';
 import { EnvType } from '../../../core/validators/env';
-import { CryptoService } from '../../../crypto/crypto.service';
+import { CryptoService } from '../../../core/crypto/crypto.service';
 import { AuditLogService } from '../../audit-log/audit-log.service';
 import { CloudinaryImageService } from '../../media/cloudinary.service';
 import { SystemService } from '../../system/system.service';

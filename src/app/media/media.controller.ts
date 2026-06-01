@@ -17,9 +17,9 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 
-import { CurrentUser } from '../../core/decorators/current-user.decorator';
-import { ApiResponse, createApiResponse } from '../../core/interceptors/api-response.interceptor';
-import { ZodValidationPipe } from '../../core/pipes/zod-validation.pipe';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { ApiResponse, createApiResponse } from '../../common/interceptors/api-response.interceptor';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import type { UserWithoutPassword } from '../auth/core/auth.types';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { MediaResponseType } from './media.types';

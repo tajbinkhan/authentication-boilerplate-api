@@ -2,13 +2,13 @@ import { Inject, Injectable } from '@nestjs/common';
 import { and, eq, isNull } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
-import { DATABASE_CONNECTION } from '../../../database/connection';
-import schema from '../../../database/schema';
+import { DATABASE_CONNECTION } from '../../../core/database/connection';
+import schema from '../../../core/database/schema';
 import type {
 	TwoFactorRecoveryCodeSchemaType,
 	TwoFactorSetupSchemaType,
 	UserSchemaType,
-} from '../../../database/types';
+} from '../../../core/database/types';
 
 export type TwoFactorDatabase = NodePgDatabase<typeof schema>;
 export type TwoFactorTransaction = Parameters<Parameters<TwoFactorDatabase['transaction']>[0]>[0];

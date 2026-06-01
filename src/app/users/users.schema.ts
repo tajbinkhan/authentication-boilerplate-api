@@ -9,7 +9,7 @@ import {
 	validatePhoneNumber,
 	validateString,
 } from '../../core/validators/common.schema';
-import { roleTypeEnum } from '../../models/drizzle/enum.model';
+import { roleTypeEnum } from '../../core/database/schema/enum.schema';
 
 export const userRoleValues = roleTypeEnum.enumValues;
 

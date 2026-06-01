@@ -3,8 +3,8 @@ import { HealthIndicator, HealthIndicatorResult } from '@nestjs/terminus';
 import { sql } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
-import { DATABASE_CONNECTION } from '../../database/connection';
-import schema from '../../database/schema';
+import { DATABASE_CONNECTION } from '../../core/database/connection';
+import schema from '../../core/database/schema';
 
 @Injectable()
 export class DrizzleHealthIndicator extends HealthIndicator {

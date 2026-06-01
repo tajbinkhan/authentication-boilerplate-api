@@ -6,12 +6,12 @@ import { AppModule } from './app.module';
 
 import { CsrfGuard } from './app/csrf/csrf.guard';
 import { CsrfService } from './app/csrf/csrf.service';
-import { GlobalExceptionFilter } from './core/filters/http-exception.filter';
-import { ApiResponseInterceptor } from './core/interceptors/api-response.interceptor';
+import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
+import { ApiResponseInterceptor } from './common/interceptors/api-response.interceptor';
 import { appLogger, displayStartupInfo } from './core/logging/app.logger';
 import { logAllRoutes } from './core/logging/route.logger';
-import { requestIdMiddleware } from './core/middlewares/request-id.middleware';
-import { createSecurityHeadersMiddleware } from './core/middlewares/security-headers.middleware';
+import { requestIdMiddleware } from './common/middlewares/request-id.middleware';
+import { createSecurityHeadersMiddleware } from './common/middlewares/security-headers.middleware';
 import { EnvType } from './core/validators/env';
 
 async function bootstrap() {

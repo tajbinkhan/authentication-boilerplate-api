@@ -1,6 +1,6 @@
 import * as Handlebars from 'handlebars';
 
-import type { EmailTemplateSchemaType } from '../../database/types';
+import type { EmailTemplateSchemaType } from '../../core/database/types';
 
 export interface CompiledEmailTemplate {
 	key: string;

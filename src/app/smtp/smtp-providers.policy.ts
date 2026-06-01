@@ -1,5 +1,5 @@
 import { forbiddenError } from '../../core/errors/domain-error';
-import type { SmtpProviderSchemaType } from '../../database/types';
+import type { SmtpProviderSchemaType } from '../../core/database/types';
 
 export class SmtpProvidersPolicy {
 	static assertCanDelete(provider: SmtpProviderSchemaType, activeCount: number): void {

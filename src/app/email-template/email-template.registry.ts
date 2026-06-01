@@ -1,4 +1,4 @@
-import type { RoleTypeEnum } from '../../database/types';
+import type { RoleTypeEnum } from '../../core/database/types';
 
 // ─── Template Key Constants ────────────────────────────────────────────────────
 

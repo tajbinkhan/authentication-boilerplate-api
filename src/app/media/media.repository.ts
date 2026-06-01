@@ -2,10 +2,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import { and, count, desc, eq, gte, ilike, lte, or, type SQL } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
-import { DATABASE_CONNECTION } from '../../database/connection';
-import { orderByColumn } from '../../database/helpers';
-import schema from '../../database/schema';
-import type { MediaSchemaType } from '../../database/types';
+import { DATABASE_CONNECTION } from '../../core/database/connection';
+import { orderByColumn } from '../../core/database/helpers';
+import schema from '../../core/database/schema';
+import type { MediaSchemaType } from '../../core/database/types';
 import type { MediaDataType } from './media.types';
 import { type MediaDto, type MediaListQueryDto } from './media.schema';
 import type { MediaDeleteRow, MediaResponseRow } from './media.mapper';

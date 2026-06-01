@@ -1,4 +1,4 @@
-import type { SessionSchemaType } from '../../../database/types';
+import type { SessionSchemaType } from '../../../core/database/types';
 import type { SessionResponse, SessionStatus } from './session.types';
 
 export function mapSessionResponse(

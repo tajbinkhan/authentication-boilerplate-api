@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { validateEnum } from '../../core/validators/common.schema';
-import { roleTypeEnum } from '../../models/drizzle/enum.model';
+import { roleTypeEnum } from '../../core/database/schema/enum.schema';
 
 export const updateSystemSettingsSchema = z
 	.object({

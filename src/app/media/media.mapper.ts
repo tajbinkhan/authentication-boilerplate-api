@@ -1,6 +1,6 @@
 import type { UploadApiResponse } from 'cloudinary';
 
-import type { MediaSchemaType } from '../../database/types';
+import type { MediaSchemaType } from '../../core/database/types';
 import type {
 	MediaDataType,
 	MediaDeleteResponseType,

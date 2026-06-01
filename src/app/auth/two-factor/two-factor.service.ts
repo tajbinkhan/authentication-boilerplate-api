@@ -13,8 +13,8 @@ import {
 	unauthorizedError,
 } from '../../../core/errors/domain-error';
 import { EnvType } from '../../../core/validators/env';
-import { CryptoService } from '../../../crypto/crypto.service';
-import type { SessionSchemaType, UserSchemaType } from '../../../database/types';
+import { CryptoService } from '../../../core/crypto/crypto.service';
+import type { SessionSchemaType, UserSchemaType } from '../../../core/database/types';
 import { AuthService } from '../core/auth.service';
 import type { UserWithoutPassword } from '../core/auth.types';
 import { SessionService } from '../session/session.service';

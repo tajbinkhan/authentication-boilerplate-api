@@ -1,5 +1,5 @@
-import type { UserSchemaType } from '../../database/types';
-import type { RoleTypeEnum } from '../../database/types';
+import type { UserSchemaType } from '../../core/database/types';
+import type { RoleTypeEnum } from '../../core/database/types';
 
 export type UserRole = RoleTypeEnum;
 

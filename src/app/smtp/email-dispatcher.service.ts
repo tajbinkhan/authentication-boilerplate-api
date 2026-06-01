@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { badGatewayError } from '../../core/errors/domain-error';
-import { CryptoService } from '../../crypto/crypto.service';
-import type { SmtpProviderSchemaType } from '../../database/types';
+import { CryptoService } from '../../core/crypto/crypto.service';
+import type { SmtpProviderSchemaType } from '../../core/database/types';
 import type { TemplateKey, TemplateVariableMap } from '../email-template/email-template.registry';
 import { EmailTemplateService } from '../email-template/email-template.service';
 import { EmailLogsService } from '../email-logs/email-logs.service';

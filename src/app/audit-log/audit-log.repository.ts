@@ -2,10 +2,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import { and, count, desc, eq, gte, lte, sql, type SQL } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
-import { DATABASE_CONNECTION } from '../../database/connection';
-import { orderByColumn } from '../../database/helpers';
-import schema from '../../database/schema';
-import type { RoleTypeEnum } from '../../database/types';
+import { DATABASE_CONNECTION } from '../../core/database/connection';
+import { orderByColumn } from '../../core/database/helpers';
+import schema from '../../core/database/schema';
+import type { RoleTypeEnum } from '../../core/database/types';
 import type { AuditLogRow } from './audit-log.mapper';
 import type { AuditLogListQueryDto } from './audit-log.schema';
 

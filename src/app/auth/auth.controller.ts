@@ -22,15 +22,15 @@ import { Throttle } from '@nestjs/throttler';
 import type { Request as ExpressRequest, Response } from 'express';
 import { memoryStorage } from 'multer';
 
-import { CurrentUser } from '../../core/decorators/current-user.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { badRequestError } from '../../core/errors/domain-error';
-import { BruteForceGuard } from '../../core/guards/brute-force.guard';
-import { AppHelpers } from '../../core/helpers/app.helper';
+import { BruteForceGuard } from '../../common/guards/brute-force.guard';
+import { AppHelpers } from '../../common/helpers/app.helper';
 import {
 	type ApiResponse,
 	createApiResponse,
-} from '../../core/interceptors/api-response.interceptor';
-import { ZodValidationPipe } from '../../core/pipes/zod-validation.pipe';
+} from '../../common/interceptors/api-response.interceptor';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { EnvType } from '../../core/validators/env';
 import { SECURITY_STORE_TOKEN, type ISecurityStore } from '../../core/security-store';
 import { FILE_SIZE_LIMIT, singleFileSchema, ZodFileValidationPipe } from '../media/media.pipe';

@@ -1,4 +1,4 @@
-import type { RoleTypeEnum, UserSchemaType } from '../../database/types';
+import type { RoleTypeEnum, UserSchemaType } from '../../core/database/types';
 import { forbiddenError } from '../../core/errors/domain-error';
 
 type UserActor = Pick<UserSchemaType, 'id' | 'role'>;
