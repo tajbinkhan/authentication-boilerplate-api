@@ -32,27 +32,3 @@ export type UserManagementRow = Pick<
 > & {
 	activeSessionCount: number;
 };
-
-export type UserManagementResponse = Omit<UserManagementRow, 'id' | 'publicId'> & {
-	id: string;
-};
-
-export interface UserListResponse {
-	rows: UserManagementResponse[];
-	total: number;
-	page: number;
-	pageSize: number;
-}
-
-export interface DeleteUserResponse {
-	deleted: boolean;
-}
-
-export interface RevokeUserSessionsResponse {
-	revokedCount: number;
-}
-
-export interface ResetUserTwoFactorResponse {
-	reset: boolean;
-	revokedCount: number;
-}

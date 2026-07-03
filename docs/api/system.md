@@ -126,3 +126,8 @@ Content-Type: application/json
 | 401 | `unauthorized` | Missing or invalid access token. |
 | 403 | `forbidden` | Caller does not have the `ADMIN` role. |
 | 422 | `validation_failed` | Request body failed validation. |
+
+## Response Validation
+
+Public and administrator settings responses are synchronously parsed by system Zod response
+schemas. Only the documented settings fields can cross the network seam.

@@ -21,12 +21,6 @@ export type CreateUser = Omit<
 	'id' | 'publicId' | 'is2faEnabled' | 'twoFactorSecretEncrypted' | 'createdAt' | 'updatedAt'
 >;
 
-// Api Response Types
-export type UserWithoutPasswordResponse = Omit<
-	UserSchemaType,
-	'id' | 'publicId' | 'password' | 'twoFactorSecretEncrypted'
-> & { id: string; hasPassword: boolean };
-
 export interface UserInformation {
 	userId: number;
 	email: string;

@@ -4,8 +4,8 @@ import type { MediaSchemaType } from '../../core/database/types';
 import type {
 	MediaDataType,
 	MediaDeleteResponseType,
-	MediaResponseType,
 } from './media.types';
+import { mediaResponseSchema, type MediaResponseType } from './schemas/media.schema';
 
 export type MediaResponseRow = Pick<
 	MediaSchemaType,
@@ -51,9 +51,12 @@ export function mapUploadToMediaData(
 }
 
 export function mapMediaResponse(row: MediaResponseRow): MediaResponseType {
-	return row;
+	return mediaResponseSchema.parse(row);
 }
 
 export function mapMediaDeleteResponse(row: MediaDeleteRow): MediaDeleteResponseType {
-	return row;
+	return {
+		...mediaResponseSchema.parse(row),
+		storageKey: row.storageKey,
+	};
 }

@@ -2,9 +2,12 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import { badGatewayError, notFoundError } from '../../core/errors/domain-error';
 import type { EmailLogSchemaType } from '../../core/database/types';
-import type { EmailLogListResponse, EmailLogResponse } from './email-log.types';
 import { EmailLogsRepository } from './email-logs.repository';
-import type { EmailLogsListQueryDto } from './email-logs.schema';
+import type {
+	EmailLogListResponse,
+	EmailLogResponse,
+	EmailLogsListQueryDto,
+} from './schemas/email-logs.schema';
 
 export interface CreateEmailLogParams {
 	smtpProviderId: number | null;

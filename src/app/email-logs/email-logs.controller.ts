@@ -18,11 +18,15 @@ import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { EmailDispatcherService } from '../smtp/services/email-dispatcher.service';
 import { SmtpProvidersRepository } from '../smtp/smtp-providers.repository';
-import type { EmailLogListResponse, EmailLogResponse } from './email-log.types';
 import {
+	deletedEmailLogApiResponseSchema,
+	emailLogApiResponseSchema,
+	type EmailLogListResponse,
+	emailLogListApiResponseSchema,
+	type EmailLogResponse,
 	type EmailLogsListQueryDto,
 	emailLogsListQuerySchema,
-} from './email-logs.schema';
+} from './schemas/email-logs.schema';
 import { EmailLogsService } from './email-logs.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -49,7 +53,9 @@ export class EmailLogsController {
 		}
 
 		const result = await this.emailLogsService.listAllLogs(providerId, query);
-		return createApiResponse(HttpStatus.OK, 'Email logs fetched successfully', result);
+		return emailLogListApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'Email logs fetched successfully', result),
+		);
 	}
 
 	@Get(':logId')
@@ -57,7 +63,9 @@ export class EmailLogsController {
 		@Param('logId') logId: string,
 	): Promise<ApiResponse<EmailLogResponse>> {
 		const log = await this.emailLogsService.getLogByPublicId(logId);
-		return createApiResponse(HttpStatus.OK, 'Email log fetched successfully', log);
+		return emailLogApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'Email log fetched successfully', log),
+		);
 	}
 
 	@Post(':logId/resend')
@@ -81,10 +89,12 @@ export class EmailLogsController {
 			logData.smtpProviderId ?? 0,
 		);
 
-		return createApiResponse(
-			HttpStatus.OK,
-			'Email resent successfully',
-			latestLog ?? (await this.emailLogsService.getLogByPublicId(logId)),
+		return emailLogApiResponseSchema.parse(
+			createApiResponse(
+				HttpStatus.OK,
+				'Email resent successfully',
+				latestLog ?? (await this.emailLogsService.getLogByPublicId(logId)),
+			),
 		);
 	}
 
@@ -93,6 +103,8 @@ export class EmailLogsController {
 		@Param('logId') logId: string,
 	): Promise<ApiResponse<{ deleted: boolean }>> {
 		const result = await this.emailLogsService.deleteLogByPublicId(logId);
-		return createApiResponse(HttpStatus.OK, 'Email log deleted successfully', result);
+		return deletedEmailLogApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'Email log deleted successfully', result),
+		);
 	}
 }

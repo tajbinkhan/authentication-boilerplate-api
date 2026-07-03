@@ -14,22 +14,20 @@ import { InvitationEmail } from '../auth/emails/invitation.email';
 import { TwoFactorAlertEmail } from '../auth/emails/two-factor-alert.email';
 import { TwoFactorService } from '../auth/two-factor/two-factor.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
-import type {
-	DeleteUserResponse,
-	RevokeUserSessionsResponse,
-	ResetUserTwoFactorResponse,
-	UserListResponse,
-	UserManagementResponse,
-} from './users.types';
 import { mapUserManagementResponse } from './users.mapper';
 import { UsersPolicy } from './users.policy';
 import { UsersRepository } from './users.repository';
 import type {
 	CreateUserDto,
+	DeleteUserResponse,
+	ResetUserTwoFactorResponse,
+	RevokeUserSessionsResponse,
 	UpdateUserDto,
 	UpdateUserRoleDto,
+	UserListResponse,
+	UserManagementResponse,
 	UsersListQueryDto,
-} from './users.schema';
+} from './schemas/users.schema';
 
 @Injectable()
 export class UsersService {

@@ -7,7 +7,7 @@ import { DATABASE_CONNECTION } from '../../core/database/connection';
 import { orderByColumn } from '../../core/database/helpers';
 import schema from '../../core/database/schema';
 import type { EmailLogSchemaType } from '../../core/database/types';
-import type { EmailLogsListQueryDto } from './email-logs.schema';
+import type { EmailLogsListQueryDto } from './schemas/email-logs.schema';
 
 export type EmailLogDatabase = NodePgDatabase<typeof schema>;
 

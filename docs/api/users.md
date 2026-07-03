@@ -69,6 +69,12 @@ GET /users?page=1&pageSize=10&role=USER,MANAGER&emailVerified=true&sort=createdA
 }
 ```
 
+## Response Validation
+
+Every successful response is synchronously parsed by a users Zod response schema. User records,
+list metadata, mutation results, UUIDs, roles, booleans, and dates are sanitized before they cross
+the network seam.
+
 ## `GET /users/:id`
 
 Fetches one managed user by public user UUID. The same conservative management rules apply, so

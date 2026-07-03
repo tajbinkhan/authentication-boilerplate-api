@@ -22,14 +22,17 @@ import { ApiResponse, createApiResponse } from '../../common/interceptors/api-re
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import type { UserWithoutPassword } from '../auth/auth.types';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { MediaResponseType } from './media.types';
-import { FILE_SIZE_LIMIT, singleFileSchema, ZodFileValidationPipe } from './media.pipe';
+import { ZodFileValidationPipe } from './media.pipe';
 import {
+	mediaListApiResponseSchema,
 	type MediaDto,
+	type MediaResponseType,
+	mediaMutationApiResponseSchema,
 	mediaSchema,
 	type MediaListQueryDto,
 	mediaListQuerySchema,
-} from './media.schema';
+} from './schemas/media.schema';
+import { FILE_SIZE_LIMIT, singleFileSchema } from './schemas/media-file.schema';
 import { MediaService } from './services/media.service';
 
 @Controller('media')
@@ -53,7 +56,9 @@ export class MediaController {
 	): Promise<ApiResponse<boolean>> {
 		const response = await this.mediaService.uploadFile(user.id, file);
 
-		return createApiResponse(HttpStatus.OK, 'Media uploaded successfully', response);
+		return mediaMutationApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'Media uploaded successfully', response),
+		);
 	}
 
 	@UseGuards(JwtAuthGuard)
@@ -64,7 +69,9 @@ export class MediaController {
 	): Promise<ApiResponse<MediaResponseType[]>> {
 		const { data, pagination } = await this.mediaService.getAllMedia(user.id, query);
 
-		return createApiResponse(HttpStatus.OK, 'Media fetched successfully', data, pagination);
+		return mediaListApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'Media fetched successfully', data, pagination),
+		);
 	}
 
 	@UseGuards(JwtAuthGuard)
@@ -76,7 +83,9 @@ export class MediaController {
 	): Promise<ApiResponse<boolean>> {
 		const response = await this.mediaService.updateMediaData(user.id, id, body);
 
-		return createApiResponse(HttpStatus.OK, 'Media updated successfully', response);
+		return mediaMutationApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'Media updated successfully', response),
+		);
 	}
 
 	@UseGuards(JwtAuthGuard)
@@ -87,6 +96,8 @@ export class MediaController {
 	): Promise<ApiResponse<boolean>> {
 		await this.mediaService.deleteMedia(user.id, id);
 
-		return createApiResponse(HttpStatus.OK, 'Media deleted successfully', true);
+		return mediaMutationApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'Media deleted successfully', true),
+		);
 	}
 }

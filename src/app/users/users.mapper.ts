@@ -1,4 +1,5 @@
-import type { UserManagementResponse, UserManagementRow } from './users.types';
+import type { UserManagementResponse } from './schemas/users.schema';
+import type { UserManagementRow } from './users.types';
 
 export function mapUserManagementResponse(row: UserManagementRow): UserManagementResponse {
 	return {

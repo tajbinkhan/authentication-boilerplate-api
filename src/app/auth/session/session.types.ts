@@ -24,24 +24,3 @@ export type SessionSortKey =
 	| 'expiresAt';
 
 export type SessionSortDirection = 'asc' | 'desc';
-
-export type SessionResponse = Pick<
-	SessionSchemaType,
-	'isRevoked' | 'twoFactorVerified' | 'createdAt' | 'updatedAt' | 'expiresAt'
-> & {
-	id: string;
-	deviceName: string;
-	deviceType: string;
-	ipAddress: string;
-	userAgent: string;
-	status: SessionStatus;
-	isCurrent: boolean;
-};
-
-export interface SessionListResponse {
-	rows: SessionResponse[];
-	total: number;
-	page: number;
-	pageSize: number;
-	activeOtherSessionCount: number;
-}

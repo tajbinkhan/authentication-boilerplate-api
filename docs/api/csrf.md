@@ -76,3 +76,8 @@ Unsafe methods (`POST`, `PUT`, `PATCH`, and `DELETE`) require:
 - The same token value in the `x-csrf-token` request header.
 
 Safe methods (`GET`, `HEAD`, and `OPTIONS`) bypass CSRF validation.
+
+## Response Validation
+
+The issued token is returned in the standard success envelope and synchronously parsed by the CSRF
+Zod response schema before crossing the network seam.

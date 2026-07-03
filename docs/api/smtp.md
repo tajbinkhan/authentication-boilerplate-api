@@ -37,6 +37,12 @@ Optional:
 GET /smtp-providers?page=1&pageSize=10&isActive=true&sort=createdAt&dir=desc
 ```
 
+## Response Validation
+
+SMTP provider and email-log success responses are synchronously parsed by feature Zod response
+schemas. Provider configuration remains masked, provider types and statuses are constrained, and
+unknown persistence fields are removed before the network seam.
+
 ### Example Success
 
 ```json

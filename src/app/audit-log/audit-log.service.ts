@@ -3,9 +3,13 @@ import type { Request } from 'express';
 
 import type { RoleTypeEnum } from '../../core/database/types';
 import type { UserWithoutPassword } from '../auth/auth.types';
-import { type AuditLogFilterOptionsResponse, type AuditLogListResponse, mapAuditLogResponse } from './audit-log.mapper';
+import { mapAuditLogResponse } from './audit-log.mapper';
 import { AuditLogRepository } from './audit-log.repository';
-import type { AuditLogListQueryDto } from './audit-log.schema';
+import type {
+	AuditLogFilterOptionsResponse,
+	AuditLogListQueryDto,
+	AuditLogListResponse,
+} from './schemas/audit-log.schema';
 
 type AuditActor = Pick<UserWithoutPassword, 'id' | 'role' | 'name' | 'email'>;
 

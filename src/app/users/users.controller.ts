@@ -22,23 +22,26 @@ import { ApiResponse, createApiResponse } from '../../common/interceptors/api-re
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import type { UserWithoutPassword } from '../auth/auth.types';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import type {
-	DeleteUserResponse,
-	RevokeUserSessionsResponse,
-	ResetUserTwoFactorResponse,
-	UserListResponse,
-	UserManagementResponse,
-} from './users.types';
 import {
 	type CreateUserDto,
 	createUserSchema,
+	type DeleteUserResponse,
+	deleteUserApiResponseSchema,
+	type ResetUserTwoFactorResponse,
+	resetUserTwoFactorApiResponseSchema,
+	type RevokeUserSessionsResponse,
+	revokeUserSessionsApiResponseSchema,
 	type UpdateUserDto,
 	type UpdateUserRoleDto,
 	updateUserSchema,
 	updateUserRoleSchema,
+	userApiResponseSchema,
+	type UserListResponse,
+	userListApiResponseSchema,
+	type UserManagementResponse,
 	type UsersListQueryDto,
 	usersListQuerySchema,
-} from './users.schema';
+} from './schemas/users.schema';
 import { UsersService } from './users.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -53,7 +56,9 @@ export class UsersController {
 	): Promise<ApiResponse<UserListResponse>> {
 		const users = await this.usersService.listUsers(query);
 
-		return createApiResponse(HttpStatus.OK, 'Users fetched successfully', users);
+		return userListApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'Users fetched successfully', users),
+		);
 	}
 
 	@Get(':id')
@@ -63,7 +68,9 @@ export class UsersController {
 	): Promise<ApiResponse<UserManagementResponse>> {
 		const user = await this.usersService.getUserById(currentUser, id);
 
-		return createApiResponse(HttpStatus.OK, 'User fetched successfully', user);
+		return userApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'User fetched successfully', user),
+		);
 	}
 
 	@Post()
@@ -74,7 +81,9 @@ export class UsersController {
 	): Promise<ApiResponse<UserManagementResponse>> {
 		const user = await this.usersService.createUser(currentUser, body, request);
 
-		return createApiResponse(HttpStatus.CREATED, 'User created successfully', user);
+		return userApiResponseSchema.parse(
+			createApiResponse(HttpStatus.CREATED, 'User created successfully', user),
+		);
 	}
 
 	@Patch(':id')
@@ -86,7 +95,9 @@ export class UsersController {
 	): Promise<ApiResponse<UserManagementResponse>> {
 		const user = await this.usersService.updateUser(currentUser, id, body, request);
 
-		return createApiResponse(HttpStatus.OK, 'User updated successfully', user);
+		return userApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'User updated successfully', user),
+		);
 	}
 
 	@Patch(':id/role')
@@ -98,7 +109,9 @@ export class UsersController {
 	): Promise<ApiResponse<UserManagementResponse>> {
 		const user = await this.usersService.updateUserRole(currentUser, id, body, request);
 
-		return createApiResponse(HttpStatus.OK, 'User role updated successfully', user);
+		return userApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'User role updated successfully', user),
+		);
 	}
 
 	@Delete(':id')
@@ -109,7 +122,9 @@ export class UsersController {
 	): Promise<ApiResponse<DeleteUserResponse>> {
 		const result = await this.usersService.deleteUser(currentUser, id, request);
 
-		return createApiResponse(HttpStatus.OK, 'User deleted successfully', result);
+		return deleteUserApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'User deleted successfully', result),
+		);
 	}
 
 	@Post(':id/sessions/revoke')
@@ -121,7 +136,9 @@ export class UsersController {
 	): Promise<ApiResponse<RevokeUserSessionsResponse>> {
 		const result = await this.usersService.revokeUserSessions(currentUser, id, request);
 
-		return createApiResponse(HttpStatus.OK, 'User sessions revoked successfully', result);
+		return revokeUserSessionsApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'User sessions revoked successfully', result),
+		);
 	}
 
 	@Post(':id/2fa/reset')
@@ -133,10 +150,12 @@ export class UsersController {
 	): Promise<ApiResponse<ResetUserTwoFactorResponse>> {
 		const result = await this.usersService.resetUserTwoFactor(currentUser, id, request);
 
-		return createApiResponse(
-			HttpStatus.OK,
-			'User two-factor authentication reset successfully',
-			result,
+		return resetUserTwoFactorApiResponseSchema.parse(
+			createApiResponse(
+				HttpStatus.OK,
+				'User two-factor authentication reset successfully',
+				result,
+			),
 		);
 	}
 }

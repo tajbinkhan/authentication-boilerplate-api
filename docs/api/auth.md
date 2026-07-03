@@ -43,6 +43,13 @@ JSON body:
 }
 ```
 
+## Response Validation
+
+Every JSON success response is synchronously parsed by an auth Zod response schema before it
+crosses the network seam. Unknown response fields are removed, identifiers and dates are validated,
+and password and two-factor secret fields are never part of the response contract. Redirect URLs
+are also parsed before Express sends the redirect.
+
 ### Optional Parameters
 
 - `redirectUrl`: optional same-origin frontend URL to visit after successful verification.

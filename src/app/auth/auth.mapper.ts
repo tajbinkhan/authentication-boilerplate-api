@@ -1,5 +1,6 @@
 import type { UserSchemaType } from '../../core/database/types';
-import type { UserWithoutPassword, UserWithoutPasswordResponse } from './auth.types';
+import type { UserWithoutPasswordResponse } from './schemas/auth.schema';
+import type { UserWithoutPassword } from './auth.types';
 
 export function stripUserPassword(user: UserSchemaType): UserWithoutPassword {
 	const { password, twoFactorSecretEncrypted, ...userWithoutPassword } = user;

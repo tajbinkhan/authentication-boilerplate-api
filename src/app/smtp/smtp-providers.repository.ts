@@ -7,7 +7,7 @@ import { DATABASE_CONNECTION } from '../../core/database/connection';
 import { orderByColumn } from '../../core/database/helpers';
 import schema from '../../core/database/schema';
 import type { SmtpProviderSchemaType } from '../../core/database/types';
-import type { SmtpProvidersListQueryDto } from './smtp-providers.schema';
+import type { SmtpProvidersListQueryDto } from './schemas/smtp-providers.schema';
 
 export type SmtpProvidersDatabase = NodePgDatabase<typeof schema>;
 

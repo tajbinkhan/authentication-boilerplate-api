@@ -114,3 +114,9 @@ System-initiated events use `actorId: null` and `actorRole: null`.
 
 Validation errors use `code: "validation_failed"`. Missing or invalid auth uses `unauthorized`.
 Insufficient role uses `forbidden`.
+
+## Response Validation
+
+Filter options and audit-log lists are synchronously parsed by audit-log Zod response schemas.
+Unknown database fields are removed, actor identifiers and roles are validated, and metadata is
+kept as an explicitly permitted record.

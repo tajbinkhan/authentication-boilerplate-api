@@ -1,10 +1,12 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HealthCheck, HealthCheckService, MemoryHealthIndicator } from '@nestjs/terminus';
 import { SkipThrottle } from '@nestjs/throttler';
 
 import { EnvType } from '../../core/validators/env';
+import { createApiResponse } from '../../common/interceptors/api-response.interceptor';
 import { DrizzleHealthIndicator } from './drizzle-health.indicator';
+import { healthApiResponseSchema } from './schemas/health.schema';
 
 @SkipThrottle()
 @Controller('health')
@@ -18,14 +20,18 @@ export class HealthController {
 
 	@Get()
 	@HealthCheck()
-	check() {
+	async check() {
 		const heapLimitMb = this.config.get('HEALTH_HEAP_LIMIT_MB', { infer: true });
 		const rssLimitMb = this.config.get('HEALTH_RSS_LIMIT_MB', { infer: true });
 
-		return this.health.check([
+		const result = await this.health.check([
 			() => this.drizzleHealth.pingCheck('database'),
 			() => this.memory.checkHeap('memory_heap', heapLimitMb * 1024 * 1024),
 			() => this.memory.checkRSS('memory_rss', rssLimitMb * 1024 * 1024),
 		]);
+
+		return healthApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'Health check completed', result),
+		);
 	}
 }

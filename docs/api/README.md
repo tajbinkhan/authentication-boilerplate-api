@@ -11,10 +11,10 @@ not from `routes.json`.
 - [CSRF](csrf.md): CSRF token issuing and unsafe-method protection.
 - [Health](health.md): database connectivity and memory usage health checks.
 - [Media](media.md): media upload, listing, update, and deletion routes.
+- [Email Templates](email-templates.md): administrator template listing, retrieval, and versioned updates.
+- [Status](status.md): public HTML status page.
 - [System](system.md): application-level access model and role configuration.
 - [Users](users.md): admin user directory, user CRUD, role updates, and session revocation.
-
-`template` is an internal app module and does not expose public API routes.
 
 ## Success Envelope
 
@@ -29,6 +29,9 @@ Most JSON endpoints are wrapped by the global API response interceptor:
 	"path": "/example"
 }
 ```
+
+Controllers synchronously parse successful responses with feature-owned Zod response schemas
+before the interceptor fills the request path. Unknown response fields are removed at this seam.
 
 Redirect endpoints that use an Express response object can return a redirect instead of this JSON
 shape.

@@ -7,8 +7,8 @@ import { sessionRenewalThreshold, sessionTimeout } from '../../../common/helpers
 import type { SessionSchemaType } from '../../../core/database/types';
 import { mapSessionResponse } from './session.mapper';
 import { SessionRepository } from './session.repository';
-import type { SessionListQueryDto } from './session.schema';
-import type { SessionDataType, SessionListResponse } from './session.types';
+import type { SessionListQueryDto, SessionListResponse } from '../schemas/session.schema';
+import type { SessionDataType } from './session.types';
 
 const clientUserAgentHeaders = [
 	'x-client-user-agent',

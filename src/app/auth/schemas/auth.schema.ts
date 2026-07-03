@@ -1,9 +1,15 @@
 import z from 'zod';
+import { roleTypeEnum } from '../../../core/database/schema/enum.schema';
+import { createApiResponseSchema } from '../../../core/validators/api-response.schema';
 import {
+	validateBoolean,
+	validateDate,
 	validateEmail,
+	validateEnum,
 	validatePassword,
 	validatePhoneNumber,
 	validateString,
+	validateUUID,
 } from '../../../core/validators/common.schema';
 
 export const loginSchema = z
@@ -70,3 +76,25 @@ export type MagicLinkRequestDto = z.infer<typeof magicLinkRequestSchema>;
 export type MagicLinkVerifyDto = z.infer<typeof magicLinkVerifySchema>;
 export type RegisterDto = z.infer<typeof registerSchema>;
 export type UpdateProfileDto = z.infer<typeof updateProfileSchema>;
+
+export const userResponseSchema = z.object({
+	id: validateUUID('User ID'),
+	name: validateString('Name').nullable(),
+	email: validateEmail,
+	emailVerified: validateBoolean('Email Verified'),
+	image: validateString('Image').nullable(),
+	imageInformation: z.null(),
+	phone: validateString('Phone').nullable(),
+	is2faEnabled: validateBoolean('Two-Factor Enabled'),
+	role: validateEnum('Role', roleTypeEnum.enumValues),
+	isApproved: validateBoolean('Is Approved'),
+	createdAt: validateDate('Created At'),
+	updatedAt: validateDate('Updated At'),
+	hasPassword: validateBoolean('Has Password'),
+});
+
+export const userApiResponseSchema = createApiResponseSchema(userResponseSchema);
+export const nullApiResponseSchema = createApiResponseSchema(z.null());
+export const magicLinkRedirectResponseSchema = validateString('Magic Link Redirect URL', { max: 2048 });
+
+export type UserWithoutPasswordResponse = z.infer<typeof userResponseSchema>;

@@ -26,7 +26,7 @@ import type {
 	TwoFactorSetupStartResponse,
 	TwoFactorStatusResponse,
 	TwoFactorVerifyResponse,
-} from './two-factor.types';
+} from '../schemas/two-factor.schema';
 
 const setupExpiresMs = 10 * 60 * 1000;
 const recoveryCodeCount = 10;

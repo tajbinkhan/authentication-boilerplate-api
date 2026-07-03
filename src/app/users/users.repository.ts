@@ -8,7 +8,7 @@ import { orderByColumn } from '../../core/database/helpers';
 import schema from '../../core/database/schema';
 import type { UserSchemaType } from '../../core/database/types';
 import type { UserManagementRow } from './users.types';
-import type { UsersListQueryDto } from './users.schema';
+import type { UsersListQueryDto } from './schemas/users.schema';
 
 export type UsersDatabase = NodePgDatabase<typeof schema>;
 

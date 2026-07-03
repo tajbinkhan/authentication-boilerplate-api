@@ -7,7 +7,7 @@ import { orderByColumn } from '../../core/database/helpers';
 import schema from '../../core/database/schema';
 import type { MediaSchemaType } from '../../core/database/types';
 import type { MediaDataType } from './media.types';
-import { type MediaDto, type MediaListQueryDto } from './media.schema';
+import { type MediaDto, type MediaListQueryDto } from './schemas/media.schema';
 import type { MediaDeleteRow, MediaResponseRow } from './media.mapper';
 
 export type MediaDatabase = NodePgDatabase<typeof schema>;

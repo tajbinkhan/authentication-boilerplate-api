@@ -5,8 +5,14 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { ApiResponse, createApiResponse } from '../../common/interceptors/api-response.interceptor';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import type { AuditLogFilterOptionsResponse, AuditLogListResponse } from './audit-log.mapper';
-import { auditLogListQuerySchema, type AuditLogListQueryDto } from './audit-log.schema';
+import {
+	type AuditLogFilterOptionsResponse,
+	auditLogFilterOptionsApiResponseSchema,
+	type AuditLogListResponse,
+	auditLogListApiResponseSchema,
+	auditLogListQuerySchema,
+	type AuditLogListQueryDto,
+} from './schemas/audit-log.schema';
 import { AuditLogService } from './audit-log.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -19,7 +25,9 @@ export class AuditLogController {
 	async getFilterOptions(): Promise<ApiResponse<AuditLogFilterOptionsResponse>> {
 		const options = await this.auditLogService.getFilterOptions();
 
-		return createApiResponse(HttpStatus.OK, 'Audit log filter options fetched successfully', options);
+		return auditLogFilterOptionsApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'Audit log filter options fetched successfully', options),
+		);
 	}
 
 	@Get()
@@ -28,6 +36,8 @@ export class AuditLogController {
 	): Promise<ApiResponse<AuditLogListResponse>> {
 		const logs = await this.auditLogService.listAuditLogs(query);
 
-		return createApiResponse(HttpStatus.OK, 'Audit logs fetched successfully', logs);
+		return auditLogListApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'Audit logs fetched successfully', logs),
+		);
 	}
 }

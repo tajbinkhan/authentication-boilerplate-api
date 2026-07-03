@@ -21,7 +21,7 @@ import type {
 	CreateSmtpProviderDto,
 	SmtpProvidersListQueryDto,
 	UpdateSmtpProviderDto,
-} from '../smtp-providers.schema';
+} from '../schemas/smtp-providers.schema';
 
 @Injectable()
 export class SmtpProvidersService {

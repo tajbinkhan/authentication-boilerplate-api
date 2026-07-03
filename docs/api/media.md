@@ -57,6 +57,12 @@ None.
 }
 ```
 
+## Response Validation
+
+Every successful media response is synchronously parsed by a media Zod response schema. Listed
+media exposes only documented public metadata; upload, update, and deletion results are constrained
+to booleans. File validation schemas live with the feature's other schemas.
+
 ### Error Responses
 
 - `403 csrf_invalid` when the CSRF token is missing or invalid.

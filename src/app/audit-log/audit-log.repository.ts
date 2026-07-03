@@ -7,7 +7,7 @@ import { orderByColumn } from '../../core/database/helpers';
 import schema from '../../core/database/schema';
 import type { RoleTypeEnum } from '../../core/database/types';
 import type { AuditLogRow } from './audit-log.mapper';
-import type { AuditLogListQueryDto } from './audit-log.schema';
+import type { AuditLogListQueryDto } from './schemas/audit-log.schema';
 
 export type AuditLogDatabase = NodePgDatabase<typeof schema>;
 

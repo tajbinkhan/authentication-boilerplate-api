@@ -5,33 +5,19 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { ApiResponse, createApiResponse } from '../../common/interceptors/api-response.interceptor';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import type {
-	EmailTemplateListResponse,
-	EmailTemplateResponse,
-} from './email-template.types';
 import {
 	type EmailTemplateListQueryDto,
 	emailTemplateListQuerySchema,
 } from './schemas/email-template-list.schema';
-import { type UpdateEmailTemplateDto, updateEmailTemplateSchema } from './schemas/email-template.schema';
+import {
+	type EmailTemplateListResponse,
+	emailTemplateApiResponseSchema,
+	emailTemplateListApiResponseSchema,
+	type EmailTemplateResponse,
+	type UpdateEmailTemplateDto,
+	updateEmailTemplateSchema,
+} from './schemas/email-template.schema';
 import { EmailTemplateService } from './email-template.service';
-
-function toResponse(
-	template: import('../../core/database/types').EmailTemplateSchemaType,
-): EmailTemplateResponse {
-	return {
-		publicId: template.publicId,
-		key: template.key,
-		subject: template.subject,
-		html: template.html,
-		text: template.text,
-		variables: template.variables,
-		version: template.version,
-		isActive: template.isActive,
-		createdAt: template.createdAt.toISOString(),
-		updatedAt: template.updatedAt.toISOString(),
-	};
-}
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('ADMIN')
@@ -44,12 +30,9 @@ export class EmailTemplatesController {
 		@Query(new ZodValidationPipe(emailTemplateListQuerySchema)) query: EmailTemplateListQueryDto,
 	): Promise<ApiResponse<EmailTemplateListResponse>> {
 		const result = await this.emailTemplateService.getActiveTemplates(query);
-		return createApiResponse(200, 'Email templates fetched successfully', {
-			rows: result.rows.map(toResponse),
-			total: result.total,
-			page: result.page,
-			pageSize: result.pageSize,
-		});
+		return emailTemplateListApiResponseSchema.parse(
+			createApiResponse(200, 'Email templates fetched successfully', result),
+		);
 	}
 
 	@Get(':publicId')
@@ -57,7 +40,9 @@ export class EmailTemplatesController {
 		@Param('publicId') publicId: string,
 	): Promise<ApiResponse<EmailTemplateResponse>> {
 		const template = await this.emailTemplateService.getByPublicId(publicId);
-		return createApiResponse(200, 'Email template fetched successfully', toResponse(template));
+		return emailTemplateApiResponseSchema.parse(
+			createApiResponse(200, 'Email template fetched successfully', template),
+		);
 	}
 
 	@Patch(':publicId')
@@ -66,6 +51,8 @@ export class EmailTemplatesController {
 		@Body(new ZodValidationPipe(updateEmailTemplateSchema)) body: UpdateEmailTemplateDto,
 	): Promise<ApiResponse<EmailTemplateResponse>> {
 		const template = await this.emailTemplateService.updateTemplate(publicId, body);
-		return createApiResponse(200, 'Email template updated successfully', toResponse(template));
+		return emailTemplateApiResponseSchema.parse(
+			createApiResponse(200, 'Email template updated successfully', template),
+		);
 	}
 }

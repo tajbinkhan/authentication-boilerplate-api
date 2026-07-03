@@ -6,7 +6,7 @@ import { DATABASE_CONNECTION } from '../../../core/database/connection';
 import { orderByColumn } from '../../../core/database/helpers';
 import schema from '../../../core/database/schema';
 import type { SessionSchemaType } from '../../../core/database/types';
-import type { SessionListQueryDto } from './session.schema';
+import type { SessionListQueryDto } from '../schemas/session.schema';
 import type { SessionDataType, SessionStatus } from './session.types';
 
 export type SessionDatabase = NodePgDatabase<typeof schema>;

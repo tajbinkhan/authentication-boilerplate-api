@@ -1,6 +1,8 @@
 import { Controller, Get, Res } from '@nestjs/common';
 import type { Response } from 'express';
 
+import { statusHtmlResponseSchema } from './schemas/status.schema';
+
 @Controller()
 export class StatusController {
 	constructor() {}
@@ -765,6 +767,6 @@ export class StatusController {
 </body>
 </html>`;
 		res.setHeader('Content-Type', 'text/html; charset=utf-8');
-		res.send(html);
+		res.send(statusHtmlResponseSchema.parse(html));
 	}
 }

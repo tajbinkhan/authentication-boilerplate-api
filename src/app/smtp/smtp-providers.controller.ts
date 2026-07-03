@@ -21,19 +21,21 @@ import { ApiResponse, createApiResponse } from '../../common/interceptors/api-re
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import type { UserWithoutPassword } from '../auth/auth.types';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import type {
-	SmtpProviderListResponse,
-	SmtpProviderResponse,
-	TestConnectionResponse,
-} from './smtp.types';
 import {
 	type CreateSmtpProviderDto,
 	createSmtpProviderSchema,
+	deletedSmtpProviderApiResponseSchema,
+	smtpProviderApiResponseSchema,
+	type SmtpProviderListResponse,
+	smtpProviderListApiResponseSchema,
+	type SmtpProviderResponse,
 	type SmtpProvidersListQueryDto,
 	smtpProvidersListQuerySchema,
+	testConnectionApiResponseSchema,
+	type TestConnectionResponse,
 	type UpdateSmtpProviderDto,
 	updateSmtpProviderSchema,
-} from './smtp-providers.schema';
+} from './schemas/smtp-providers.schema';
 import { SmtpProvidersService } from './services/smtp-providers.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -47,13 +49,17 @@ export class SmtpProvidersController {
 		@Query(new ZodValidationPipe(smtpProvidersListQuerySchema)) query: SmtpProvidersListQueryDto,
 	): Promise<ApiResponse<SmtpProviderListResponse>> {
 		const result = await this.smtpProvidersService.listProviders(query);
-		return createApiResponse(HttpStatus.OK, 'SMTP providers fetched successfully', result);
+		return smtpProviderListApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'SMTP providers fetched successfully', result),
+		);
 	}
 
 	@Get(':id')
 	async getProvider(@Param('id') id: string): Promise<ApiResponse<SmtpProviderResponse>> {
 		const provider = await this.smtpProvidersService.getProvider(id);
-		return createApiResponse(HttpStatus.OK, 'SMTP provider fetched successfully', provider);
+		return smtpProviderApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'SMTP provider fetched successfully', provider),
+		);
 	}
 
 	@Post()
@@ -63,7 +69,9 @@ export class SmtpProvidersController {
 		@Body(new ZodValidationPipe(createSmtpProviderSchema)) body: CreateSmtpProviderDto,
 	): Promise<ApiResponse<SmtpProviderResponse>> {
 		const provider = await this.smtpProvidersService.createProvider(currentUser, body, request);
-		return createApiResponse(HttpStatus.CREATED, 'SMTP provider created successfully', provider);
+		return smtpProviderApiResponseSchema.parse(
+			createApiResponse(HttpStatus.CREATED, 'SMTP provider created successfully', provider),
+		);
 	}
 
 	@Patch(':id')
@@ -74,7 +82,9 @@ export class SmtpProvidersController {
 		@Body(new ZodValidationPipe(updateSmtpProviderSchema)) body: UpdateSmtpProviderDto,
 	): Promise<ApiResponse<SmtpProviderResponse>> {
 		const provider = await this.smtpProvidersService.updateProvider(currentUser, id, body, request);
-		return createApiResponse(HttpStatus.OK, 'SMTP provider updated successfully', provider);
+		return smtpProviderApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'SMTP provider updated successfully', provider),
+		);
 	}
 
 	@Delete(':id')
@@ -84,7 +94,9 @@ export class SmtpProvidersController {
 		@Request() request: ExpressRequest,
 	): Promise<ApiResponse<{ deleted: boolean }>> {
 		const result = await this.smtpProvidersService.deleteProvider(currentUser, id, request);
-		return createApiResponse(HttpStatus.OK, 'SMTP provider deleted successfully', result);
+		return deletedSmtpProviderApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'SMTP provider deleted successfully', result),
+		);
 	}
 
 	@Post(':id/test')
@@ -95,10 +107,12 @@ export class SmtpProvidersController {
 		@Request() request: ExpressRequest,
 	): Promise<ApiResponse<TestConnectionResponse>> {
 		const result = await this.smtpProvidersService.testConnection(currentUser, id, request);
-		return createApiResponse(
-			HttpStatus.OK,
-			result.success ? 'Connection test successful' : 'Connection test failed',
-			result,
+		return testConnectionApiResponseSchema.parse(
+			createApiResponse(
+				HttpStatus.OK,
+				result.success ? 'Connection test successful' : 'Connection test failed',
+				result,
+			),
 		);
 	}
 
@@ -110,7 +124,9 @@ export class SmtpProvidersController {
 		@Request() request: ExpressRequest,
 	): Promise<ApiResponse<SmtpProviderResponse>> {
 		const provider = await this.smtpProvidersService.setDefault(currentUser, id, request);
-		return createApiResponse(HttpStatus.OK, 'Default SMTP provider set successfully', provider);
+		return smtpProviderApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'Default SMTP provider set successfully', provider),
+		);
 	}
 
 	@Patch(':id/toggle')
@@ -120,6 +136,8 @@ export class SmtpProvidersController {
 		@Request() request: ExpressRequest,
 	): Promise<ApiResponse<SmtpProviderResponse>> {
 		const provider = await this.smtpProvidersService.toggleProvider(currentUser, id, request);
-		return createApiResponse(HttpStatus.OK, 'SMTP provider toggled successfully', provider);
+		return smtpProviderApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'SMTP provider toggled successfully', provider),
+		);
 	}
 }

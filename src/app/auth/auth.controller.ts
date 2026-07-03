@@ -33,9 +33,10 @@ import {
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { EnvType } from '../../core/validators/env';
 import { SECURITY_STORE_TOKEN, type ISecurityStore } from '../../core/security-store';
-import { FILE_SIZE_LIMIT, singleFileSchema, ZodFileValidationPipe } from '../media/media.pipe';
+import { ZodFileValidationPipe } from '../media/media.pipe';
+import { FILE_SIZE_LIMIT, singleFileSchema } from '../media/schemas/media-file.schema';
 import { AuditLogService } from '../audit-log/audit-log.service';
-import type { UserWithoutPassword, UserWithoutPasswordResponse } from './auth.types';
+import type { UserWithoutPassword } from './auth.types';
 import { mapUserResponse } from './auth.mapper';
 import {
 	type GoogleLoginDto,
@@ -43,9 +44,13 @@ import {
 	type MagicLinkRequestDto,
 	magicLinkRequestSchema,
 	type MagicLinkVerifyDto,
+	magicLinkRedirectResponseSchema,
 	magicLinkVerifySchema,
+	nullApiResponseSchema,
 	type UpdateProfileDto,
 	updateProfileSchema,
+	userApiResponseSchema,
+	type UserWithoutPasswordResponse,
 } from './schemas/auth.schema';
 import {
 	type PasswordLoginDto,
@@ -63,17 +68,30 @@ import { PartialJwtAuthGuard } from './guards/partial-jwt-auth.guard';
 import { mapSessionResponse } from './session/session.mapper';
 import { SessionService } from './session/session.service';
 import { TwoFactorAlertEmail } from './emails/two-factor-alert.email';
-import { type SessionListQueryDto, sessionListQuerySchema } from './session/session.schema';
-import type { SessionListResponse, SessionResponse } from './session/session.types';
+import {
+	revokedSessionsApiResponseSchema,
+	sessionApiResponseSchema,
+	type SessionListResponse,
+	sessionListApiResponseSchema,
+	type SessionListQueryDto,
+	type SessionResponse,
+	sessionListQuerySchema,
+} from './schemas/session.schema';
 import { TwoFactorService } from './two-factor/two-factor.service';
-import { type TwoFactorCodeDto, twoFactorCodeSchema } from './two-factor/two-factor.schema';
-import type {
-	TwoFactorDisableResponse,
-	TwoFactorRecoveryCodesResponse,
-	TwoFactorSetupStartResponse,
-	TwoFactorStatusResponse,
-	TwoFactorVerifyResponse,
-} from './two-factor/two-factor.types';
+import {
+	twoFactorCodeSchema,
+	type TwoFactorCodeDto,
+	type TwoFactorDisableResponse,
+	twoFactorDisableApiResponseSchema,
+	type TwoFactorRecoveryCodesResponse,
+	twoFactorRecoveryCodesApiResponseSchema,
+	type TwoFactorSetupStartResponse,
+	twoFactorSetupStartApiResponseSchema,
+	type TwoFactorStatusResponse,
+	twoFactorStatusApiResponseSchema,
+	type TwoFactorVerifyResponse,
+	twoFactorVerifyApiResponseSchema,
+} from './schemas/two-factor.schema';
 import type { PartialAuthRequest } from './strategies/jwt-partial.strategy';
 
 @Controller('auth')
@@ -101,10 +119,12 @@ export class AuthController {
 	): Promise<ApiResponse<null>> {
 		await this.authService.requestMagicLink(requestDto.email, requestDto.redirectUrl);
 
-		return createApiResponse(
-			HttpStatus.OK,
-			'If the email exists, a magic link has been sent',
-			null,
+		return nullApiResponseSchema.parse(
+			createApiResponse(
+				HttpStatus.OK,
+				'If the email exists, a magic link has been sent',
+				null,
+			),
 		);
 	}
 
@@ -151,9 +171,9 @@ export class AuthController {
 				request,
 			});
 
-			response.redirect(
+			response.redirect(magicLinkRedirectResponseSchema.parse(
 				this.authService.getMagicLinkRedirectUrl(verifyDto.redirectUrl ?? verifyDto.redirect),
-			);
+			));
 		} catch (error) {
 			const restriction = this.authPolicy.getDashboardAccessRestrictionFromError(error);
 
@@ -167,7 +187,9 @@ export class AuthController {
 				'requires-2fa',
 				AppHelpers.requires2faClearCookieConfig(this.configService),
 			);
-			response.redirect(this.authPolicy.getDashboardAccessRestrictionLoginUrl(restriction));
+			response.redirect(magicLinkRedirectResponseSchema.parse(
+				this.authPolicy.getDashboardAccessRestrictionLoginUrl(restriction),
+			));
 		}
 	}
 
@@ -213,10 +235,12 @@ export class AuthController {
 			request,
 		});
 
-		return createApiResponse(
-			HttpStatus.OK,
-			'Magic link verified successfully',
-			mapUserResponse(result.user),
+		return userApiResponseSchema.parse(
+			createApiResponse(
+				HttpStatus.OK,
+				'Magic link verified successfully',
+				mapUserResponse(result.user),
+			),
 		);
 	}
 
@@ -241,7 +265,9 @@ export class AuthController {
 			AppHelpers.requires2faClearCookieConfig(this.configService),
 		);
 
-		return createApiResponse(HttpStatus.OK, 'Logout successful', null);
+		return nullApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'Logout successful', null),
+		);
 	}
 
 	@UseGuards(PartialJwtAuthGuard)
@@ -251,7 +277,9 @@ export class AuthController {
 	): Promise<ApiResponse<TwoFactorStatusResponse>> {
 		const status = await this.twoFactorService.getStatus(user);
 
-		return createApiResponse(HttpStatus.OK, 'Two-factor status fetched successfully', status);
+		return twoFactorStatusApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'Two-factor status fetched successfully', status),
+		);
 	}
 
 	@UseGuards(PartialJwtAuthGuard)
@@ -262,7 +290,9 @@ export class AuthController {
 	): Promise<ApiResponse<TwoFactorSetupStartResponse>> {
 		const setup = await this.twoFactorService.startSetup(user);
 
-		return createApiResponse(HttpStatus.OK, 'Two-factor setup started successfully', setup);
+		return twoFactorSetupStartApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'Two-factor setup started successfully', setup),
+		);
 	}
 
 	@UseGuards(PartialJwtAuthGuard)
@@ -299,7 +329,9 @@ export class AuthController {
 			userAgent: userDeviceInfo.userAgent,
 		});
 
-		return createApiResponse(HttpStatus.OK, 'Two-factor setup confirmed successfully', result);
+		return twoFactorRecoveryCodesApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'Two-factor setup confirmed successfully', result),
+		);
 	}
 
 	@UseGuards(PartialJwtAuthGuard)
@@ -325,7 +357,9 @@ export class AuthController {
 			AppHelpers.requires2faClearCookieConfig(this.configService),
 		);
 
-		return createApiResponse(HttpStatus.OK, 'Two-factor verified successfully', result);
+		return twoFactorVerifyApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'Two-factor verified successfully', result),
+		);
 	}
 
 	@UseGuards(JwtAuthGuard)
@@ -388,7 +422,9 @@ export class AuthController {
 			? 'Two-factor disabled successfully. Your password has been removed and you have been logged out.'
 			: 'Two-factor disabled successfully';
 
-		return createApiResponse(HttpStatus.OK, message, result);
+		return twoFactorDisableApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, message, result),
+		);
 	}
 
 	@UseGuards(JwtAuthGuard)
@@ -406,20 +442,24 @@ export class AuthController {
 		const session = await this.getCurrentSession(user, request);
 		const result = await this.twoFactorService.regenerateRecoveryCodes(user, session, body.code);
 
-		return createApiResponse(
-			HttpStatus.OK,
-			'Two-factor recovery codes regenerated successfully',
-			result,
+		return twoFactorRecoveryCodesApiResponseSchema.parse(
+			createApiResponse(
+				HttpStatus.OK,
+				'Two-factor recovery codes regenerated successfully',
+				result,
+			),
 		);
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@Get('me')
 	getProfile(@CurrentUser() user: UserWithoutPassword): ApiResponse<UserWithoutPasswordResponse> {
-		return createApiResponse(
-			HttpStatus.OK,
-			'User profile fetched successfully',
-			mapUserResponse(user),
+		return userApiResponseSchema.parse(
+			createApiResponse(
+				HttpStatus.OK,
+				'User profile fetched successfully',
+				mapUserResponse(user),
+			),
 		);
 	}
 
@@ -436,7 +476,9 @@ export class AuthController {
 
 		const sessions = await this.sessionService.listUserSessions(user.id, query, sessionToken);
 
-		return createApiResponse(HttpStatus.OK, 'Sessions fetched successfully', sessions);
+		return sessionListApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'Sessions fetched successfully', sessions),
+		);
 	}
 
 	@UseGuards(JwtAuthGuard)
@@ -452,9 +494,9 @@ export class AuthController {
 
 		const revokedCount = await this.sessionService.revokeOtherUserSessions(user.id, sessionToken);
 
-		return createApiResponse(HttpStatus.OK, 'Other sessions revoked successfully', {
-			revokedCount,
-		});
+		return revokedSessionsApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'Other sessions revoked successfully', { revokedCount }),
+		);
 	}
 
 	@UseGuards(JwtAuthGuard)
@@ -482,10 +524,12 @@ export class AuthController {
 			);
 		}
 
-		return createApiResponse(
-			HttpStatus.OK,
-			'Session revoked successfully',
-			mapSessionResponse(revokedSession, sessionToken),
+		return sessionApiResponseSchema.parse(
+			createApiResponse(
+				HttpStatus.OK,
+				'Session revoked successfully',
+				mapSessionResponse(revokedSession, sessionToken),
+			),
 		);
 	}
 
@@ -497,10 +541,12 @@ export class AuthController {
 	): Promise<ApiResponse<UserWithoutPasswordResponse>> {
 		const updatedUser = await this.authService.updateUser(user.id, updateData);
 
-		return createApiResponse(
-			HttpStatus.OK,
-			'Profile updated successfully',
-			mapUserResponse(updatedUser),
+		return userApiResponseSchema.parse(
+			createApiResponse(
+				HttpStatus.OK,
+				'Profile updated successfully',
+				mapUserResponse(updatedUser),
+			),
 		);
 	}
 
@@ -519,10 +565,12 @@ export class AuthController {
 	): Promise<ApiResponse<UserWithoutPasswordResponse>> {
 		const updatedUser = await this.authService.updateUserProfileImage(user.id, file);
 
-		return createApiResponse(
-			HttpStatus.OK,
-			'Media uploaded successfully',
-			mapUserResponse(updatedUser),
+		return userApiResponseSchema.parse(
+			createApiResponse(
+				HttpStatus.OK,
+				'Media uploaded successfully',
+				mapUserResponse(updatedUser),
+			),
 		);
 	}
 
@@ -589,7 +637,9 @@ export class AuthController {
 				request,
 			});
 
-			return createApiResponse(HttpStatus.OK, 'Login successful', mapUserResponse(user));
+			return userApiResponseSchema.parse(
+				createApiResponse(HttpStatus.OK, 'Login successful', mapUserResponse(user)),
+			);
 		} catch (error) {
 			// Record failed login attempt for brute-force tracking
 			await BruteForceGuard.recordFailedAttempt(
@@ -624,10 +674,12 @@ export class AuthController {
 			request,
 		});
 
-		return createApiResponse(
-			HttpStatus.OK,
-			'Password set successfully',
-			mapUserResponse(updatedUser),
+		return userApiResponseSchema.parse(
+			createApiResponse(
+				HttpStatus.OK,
+				'Password set successfully',
+				mapUserResponse(updatedUser),
+			),
 		);
 	}
 
@@ -653,7 +705,9 @@ export class AuthController {
 			request,
 		});
 
-		return createApiResponse(HttpStatus.OK, 'Password changed successfully', null);
+		return nullApiResponseSchema.parse(
+			createApiResponse(HttpStatus.OK, 'Password changed successfully', null),
+		);
 	}
 
 	@UseGuards(BruteForceGuard)
@@ -718,7 +772,9 @@ export class AuthController {
 				request,
 			});
 
-			return createApiResponse(HttpStatus.OK, 'Google login successful', mapUserResponse(user));
+			return userApiResponseSchema.parse(
+				createApiResponse(HttpStatus.OK, 'Google login successful', mapUserResponse(user)),
+			);
 		} catch (error) {
 			// Record failed login attempt for brute-force tracking (by IP only for OAuth)
 			await BruteForceGuard.recordFailedAttempt(

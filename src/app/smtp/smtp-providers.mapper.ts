@@ -1,6 +1,6 @@
 import type { SmtpProviderSchemaType } from '../../core/database/types';
 import type { EmailProviderType } from './email-provider.interface';
-import type { SmtpProviderResponse } from './smtp.types';
+import type { SmtpProviderResponse } from './schemas/smtp-providers.schema';
 
 const SENSITIVE_FIELDS = ['apiKey', 'secretAccessKey', 'pass'] as const;
 const MASKED_VALUE = '••••••••';
