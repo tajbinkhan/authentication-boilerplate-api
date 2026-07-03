@@ -4,5 +4,20 @@ allowBuilds:
   esbuild: true
   unrs-resolver: true
 
+minimumReleaseAgeExclude:
+  - '@aws-sdk/client-ses@3.1079.0'
+  - '@aws-sdk/core@3.974.27'
+  - '@aws-sdk/credential-provider-env@3.972.53'
+  - '@aws-sdk/credential-provider-http@3.972.55'
+  - '@aws-sdk/credential-provider-ini@3.972.60'
+  - '@aws-sdk/credential-provider-login@3.972.59'
+  - '@aws-sdk/credential-provider-node@3.972.62'
+  - '@aws-sdk/credential-provider-process@3.972.53'
+  - '@aws-sdk/credential-provider-sso@3.972.59'
+  - '@aws-sdk/credential-provider-web-identity@3.972.59'
+  - '@aws-sdk/nested-clients@3.997.27'
+  - '@aws-sdk/token-providers@3.1079.0'
+  - libphonenumber-js@1.13.8
+
 overrides:
   '@scure/base': ^1.2.6
