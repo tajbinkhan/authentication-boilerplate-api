@@ -1,22 +1,22 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { DiscoveryModule, APP_GUARD, APP_PIPE } from '@nestjs/core';
+import { APP_GUARD, APP_PIPE, DiscoveryModule } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { AuditLogModule } from './app/audit-log/audit-log.module';
-import { AuthModule } from './app/auth/auth.module';
-import { CsrfModule } from './app/csrf/csrf.module';
-import { HealthModule } from './app/health/health.module';
-import { MediaModule } from './app/media/media.module';
-import { UsersModule } from './app/users/users.module';
-import { SystemModule } from './app/system/system.module';
-import { SmtpModule } from './app/smtp/smtp.module';
-import { StatusModule } from './app/status/status.module';
 import { ConfigurableThrottlerGuard } from './common/guards/configurable-throttler.guard';
 import { ZodValidationPipe } from './common/pipes/zod-validation.pipe';
-import { validateEnv } from './core/validators/env';
 import { CryptoModule } from './core/crypto/crypto.module';
 import { DatabaseModule } from './core/database/database.module';
 import { SecurityStoreModule } from './core/security-store/security-store.module';
+import { validateEnv } from './core/validators/env';
+import { AuditLogModule } from './modules/audit-log/audit-log.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { CsrfModule } from './modules/csrf/csrf.module';
+import { HealthModule } from './modules/health/health.module';
+import { MediaModule } from './modules/media/media.module';
+import { SmtpModule } from './modules/smtp/smtp.module';
+import { StatusModule } from './modules/status/status.module';
+import { SystemModule } from './modules/system/system.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
 	imports: [

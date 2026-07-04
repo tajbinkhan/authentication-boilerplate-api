@@ -112,8 +112,8 @@ _Improves API container execution, and deployment orchestration._
 - **Description**: Implement a health check module using NestJS Terminus, checking DB connectivity
   and key process metrics.
 - **Target Files**:
-  - [NEW] [health.module.ts](file:///f:/boilerplate/api/src/app/health/health.module.ts)
-  - [NEW] [health.controller.ts](file:///f:/boilerplate/api/src/app/health/health.controller.ts)
+  - [NEW] [health.module.ts](file:///f:/boilerplate/api/src/modules/health/health.module.ts)
+  - [NEW] [health.controller.ts](file:///f:/boilerplate/api/src/modules/health/health.controller.ts)
 
 ### 10. Docker Setup Completeness
 
@@ -138,8 +138,8 @@ _Extends core product behavior, performance, and communication._
 - **Description**: Add offset/limit or cursor query parameters on the media endpoint, limiting media
   fetches and preventing memory overload.
 - **Target Files**:
-  - [media.controller.ts](file:///f:/boilerplate/api/src/app/media/media.controller.ts)
-  - [media.service.ts](file:///f:/boilerplate/api/src/app/media/media.service.ts)
+  - [media.controller.ts](file:///f:/boilerplate/api/src/modules/media/media.controller.ts)
+  - [media.service.ts](file:///f:/boilerplate/api/src/modules/media/media.service.ts)
 
 ### 12. Single User Admin Fetch (`GET /users/:id`)
 
@@ -148,8 +148,8 @@ _Extends core product behavior, performance, and communication._
 - **Description**: Add a retrieval route for individual user details by admin, validating
   permissions.
 - **Target Files**:
-  - [users.controller.ts](file:///f:/boilerplate/api/src/app/users/users.controller.ts)
-  - [users.service.ts](file:///f:/boilerplate/api/src/app/users/users.service.ts)
+  - [users.controller.ts](file:///f:/boilerplate/api/src/modules/users/users.controller.ts)
+  - [users.service.ts](file:///f:/boilerplate/api/src/modules/users/users.service.ts)
 
 ### 13. System Settings Caching
 
@@ -158,7 +158,7 @@ _Extends core product behavior, performance, and communication._
 - **Description**: Cache `getSettings()` DB checks in memory or Redis using `@nestjs/cache-manager`
   to mitigate database load on every guard check.
 - **Target Files**:
-  - [system.service.ts](file:///f:/boilerplate/api/src/app/system/system.service.ts)
+  - [system.service.ts](file:///f:/boilerplate/api/src/modules/system/system.service.ts)
   - [app.module.ts](file:///f:/boilerplate/api/src/app.module.ts)
 
 ### 14. Transactional Email Templates
@@ -168,7 +168,7 @@ _Extends core product behavior, performance, and communication._
 - **Description**: Wire Handlebars templates for welcome emails, 2FA modifications, account approval
   alerts, and invitations.
 - **Target Files**:
-  - [magic-link-email.service.ts](file:///f:/boilerplate/api/src/app/auth/magic-link/magic-link-email.service.ts)
+  - [magic-link-email.service.ts](file:///f:/boilerplate/api/src/modules/auth/magic-link/magic-link-email.service.ts)
 
 ---
 
@@ -184,7 +184,7 @@ _Advanced compliance, security, performance instrumentation, and automation._
   handle dependency relations gracefully without breaking referential integrity.
 - **Target Files**:
   - [schema.ts](file:///f:/boilerplate/api/src/database/schema.ts)
-  - [users.service.ts](file:///f:/boilerplate/api/src/app/users/users.service.ts)
+  - [users.service.ts](file:///f:/boilerplate/api/src/modules/users/users.service.ts)
 
 ### 16. Audit / Activity Logging
 
@@ -193,7 +193,8 @@ _Advanced compliance, security, performance instrumentation, and automation._
 - **Description**: Set up an `audit_logs` table schema and interceptors/guards to track critical
   mutations (logins, role updates, 2FA settings modification).
 - **Target Files**:
-  - [NEW] [audit-log.module.ts](file:///f:/boilerplate/api/src/app/audit-log/audit-log.module.ts)
+  - [NEW]
+    [audit-log.module.ts](file:///f:/boilerplate/api/src/modules/audit-log/audit-log.module.ts)
   - [schema.ts](file:///f:/boilerplate/api/src/database/schema.ts)
 
 ### 17. Refresh Token Rotation & Silent Refresh
@@ -203,8 +204,8 @@ _Advanced compliance, security, performance instrumentation, and automation._
 - **Description**: Redesign token lifecycle to use short-lived access tokens and
   database-backed/rotating refresh tokens, preventing session hijack.
 - **Target Files**:
-  - [auth.service.ts](file:///f:/boilerplate/api/src/app/auth/auth.service.ts)
-  - [auth.controller.ts](file:///f:/boilerplate/api/src/app/auth/auth.controller.ts)
+  - [auth.service.ts](file:///f:/boilerplate/api/src/modules/auth/auth.service.ts)
+  - [auth.controller.ts](file:///f:/boilerplate/api/src/modules/auth/auth.controller.ts)
 
 ### 18. Structured Logging
 

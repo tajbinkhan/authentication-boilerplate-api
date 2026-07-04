@@ -1,18 +1,18 @@
-import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory, Reflector } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 
-import { CsrfGuard } from './app/csrf/csrf.guard';
-import { CsrfService } from './app/csrf/csrf.service';
 import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
 import { ApiResponseInterceptor } from './common/interceptors/api-response.interceptor';
-import { appLogger, displayStartupInfo } from './core/logging/app.logger';
-import { logAllRoutes } from './core/logging/route.logger';
 import { requestIdMiddleware } from './common/middlewares/request-id.middleware';
 import { createSecurityHeadersMiddleware } from './common/middlewares/security-headers.middleware';
+import { appLogger, displayStartupInfo } from './core/logging/app.logger';
+import { logAllRoutes } from './core/logging/route.logger';
 import { EnvType } from './core/validators/env';
+import { CsrfGuard } from './modules/csrf/csrf.guard';
+import { CsrfService } from './modules/csrf/csrf.service';
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);

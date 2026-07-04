@@ -37,11 +37,11 @@ database management via **Drizzle ORM**, and absolute domain isolation.
 
 ### 1. The File-Volume Directory Rule (Strict Flattener)
 
-You must continuously analyze file counts within feature modules (`src/app/[feature]/`).
+You must continuously analyze file counts within feature modules (`src/modules/[feature]/`).
 
 - **The Flat Constraint:** If a domain layer or concern (e.g., controllers, services, repositories)
   requires only a single file, **it must sit flat at the root of that feature folder**. Do not group
-  it into a folder. (Example: `src/app/user/user.service.ts`).
+  it into a folder. (Example: `src/modules/user/user.service.ts`).
 - **The Multi-File Exception:** You are permitted to create a sub-folder (e.g., `controllers/`,
   `services/`, `schemas/`) if and only if that layer expands to require **two or more separate
   files**.
@@ -66,7 +66,7 @@ You must continuously analyze file counts within feature modules (`src/app/[feat
 ### 4. Code-First System Actions
 
 - Transactional emails must be built completely code-first inside a dedicated domain helper class
-  (`src/app/[feature]/emails/[feature].email.ts`).
+  (`src/modules/[feature]/emails/[feature].email.ts`).
 - The use of `.html`, `.hbs`, or `.ejs` files is entirely forbidden. All templates must be compiled
   in memory using typesafe TypeScript template literals.
 
@@ -94,7 +94,7 @@ You must continuously analyze file counts within feature modules (`src/app/[feat
 ### 7. RBAC & Policy Layer
 
 - Role-based access control and ownership checks must live in dedicated policy files:
-  `src/app/[feature]/[feature].policy.ts`.
+  `src/modules/[feature]/[feature].policy.ts`.
 - Business rules and authorization logic must never be placed in controllers or repositories.
 - Controllers are strictly responsible for: route wiring, guards, input extraction, and delegating
   to services.
@@ -171,7 +171,7 @@ src/
 │   ├── logger/               # Custom enterprise logging providers
 │   ├── mail/                 # Global email infrastructure dispatcher wrapper
 │   └── cache/                # Key-value memory systems
-└── app/                      # Business Feature Workspace
+└── modules/                      # Business Feature Workspace
     ├── auth/                 # Multi-File Example: uses controllers/, services/, schemas/, policies/, etc.
     └── user/                 # Flat-File Example: files sit flat at root until the volume rule is tripped
 

@@ -29,9 +29,9 @@ logging. Password authentication changes are explicitly excluded.
 
 ### GAP-05 — Missing `GET /users/:id` Admin Endpoint
 
-#### [MODIFY] [users.service.ts](file:///f:/boilerplate/api/src/app/users/users.service.ts)
+#### [MODIFY] [users.service.ts](file:///f:/boilerplate/api/src/modules/users/users.service.ts)
 
-- Add a new method [getUserById](file:///f:/boilerplate/api/src/app/users/users.service.ts):
+- Add a new method [getUserById](file:///f:/boilerplate/api/src/modules/users/users.service.ts):
   ```typescript
   async getUserById(currentUser: UserWithoutPassword, publicId: string): Promise<UserManagementResponse> {
       const targetUser = await this.getTargetUser(publicId);
@@ -40,7 +40,7 @@ logging. Password authentication changes are explicitly excluded.
   }
   ```
 
-#### [MODIFY] [users.controller.ts](file:///f:/boilerplate/api/src/app/users/users.controller.ts)
+#### [MODIFY] [users.controller.ts](file:///f:/boilerplate/api/src/modules/users/users.controller.ts)
 
 - Add a route handler for `GET /users/:id`, using the standard decorators:
   ```typescript
@@ -58,7 +58,7 @@ logging. Password authentication changes are explicitly excluded.
 
 ### GAP-08 — No System Settings Cache
 
-#### [MODIFY] [system.service.ts](file:///f:/boilerplate/api/src/app/system/system.service.ts)
+#### [MODIFY] [system.service.ts](file:///f:/boilerplate/api/src/modules/system/system.service.ts)
 
 - Introduce in-memory cache fields:
   ```typescript
@@ -66,10 +66,10 @@ logging. Password authentication changes are explicitly excluded.
   private cacheExpiresAt = 0;
   private readonly CACHE_TTL_MS = 60 * 1000; // 60 seconds
   ```
-- Modify [getSettings](file:///f:/boilerplate/api/src/app/system/system.service.ts):
+- Modify [getSettings](file:///f:/boilerplate/api/src/modules/system/system.service.ts):
   - If `cachedSettings` is not null and `Date.now() < cacheExpiresAt`, return `cachedSettings`.
   - Otherwise, query from the database, cache it, update `cacheExpiresAt`, and return it.
-- Modify [updateSettings](file:///f:/boilerplate/api/src/app/system/system.service.ts):
+- Modify [updateSettings](file:///f:/boilerplate/api/src/modules/system/system.service.ts):
   - Invalidate the cache by setting `cachedSettings = null` and `cacheExpiresAt = 0`.
 
 ---
@@ -121,19 +121,19 @@ logging. Password authentication changes are explicitly excluded.
 - Add relations for [auditLogs](file:///f:/boilerplate/api/src/models/drizzle/relation.model.ts)
   linking them to the [users](file:///f:/boilerplate/api/src/models/drizzle/auth.model.ts) table.
 
-#### [NEW] [audit-log.module.ts](file:///f:/boilerplate/api/src/app/audit-log/audit-log.module.ts)
+#### [NEW] [audit-log.module.ts](file:///f:/boilerplate/api/src/modules/audit-log/audit-log.module.ts)
 
 - Standard module defining dependencies.
 
-#### [NEW] [audit-log.repository.ts](file:///f:/boilerplate/api/src/app/audit-log/audit-log.repository.ts)
+#### [NEW] [audit-log.repository.ts](file:///f:/boilerplate/api/src/modules/audit-log/audit-log.repository.ts)
 
 - Add operations to insert logs and fetch logs.
 
-#### [NEW] [audit-log.service.ts](file:///f:/boilerplate/api/src/app/audit-log/audit-log.service.ts)
+#### [NEW] [audit-log.service.ts](file:///f:/boilerplate/api/src/modules/audit-log/audit-log.service.ts)
 
 - Expose a `logAction(...)` method: captures action details, context, and inserts it.
 
-#### [NEW] [audit-log.controller.ts](file:///f:/boilerplate/api/src/app/audit-log/audit-log.controller.ts)
+#### [NEW] [audit-log.controller.ts](file:///f:/boilerplate/api/src/modules/audit-log/audit-log.controller.ts)
 
 - Expose a `GET /audit-logs` endpoint:
   - Accessible only to admins (`@Roles('ADMIN')`).
@@ -141,24 +141,24 @@ logging. Password authentication changes are explicitly excluded.
 
 #### [MODIFY] [app.module.ts](file:///f:/boilerplate/api/src/app.module.ts)
 
-- Register [AuditLogModule](file:///f:/boilerplate/api/src/app/audit-log/audit-log.module.ts).
+- Register [AuditLogModule](file:///f:/boilerplate/api/src/modules/audit-log/audit-log.module.ts).
 
-#### [MODIFY] [users.service.ts](file:///f:/boilerplate/api/src/app/users/users.service.ts)
+#### [MODIFY] [users.service.ts](file:///f:/boilerplate/api/src/modules/users/users.service.ts)
 
-- Inject [AuditLogService](file:///f:/boilerplate/api/src/app/audit-log/audit-log.service.ts).
-- Write log entries in [createUser](file:///f:/boilerplate/api/src/app/users/users.service.ts),
-  [updateUser](file:///f:/boilerplate/api/src/app/users/users.service.ts),
-  [updateUserRole](file:///f:/boilerplate/api/src/app/users/users.service.ts),
-  [deleteUser](file:///f:/boilerplate/api/src/app/users/users.service.ts),
-  [revokeUserSessions](file:///f:/boilerplate/api/src/app/users/users.service.ts), and
-  [resetUserTwoFactor](file:///f:/boilerplate/api/src/app/users/users.service.ts).
+- Inject [AuditLogService](file:///f:/boilerplate/api/src/modules/audit-log/audit-log.service.ts).
+- Write log entries in [createUser](file:///f:/boilerplate/api/src/modules/users/users.service.ts),
+  [updateUser](file:///f:/boilerplate/api/src/modules/users/users.service.ts),
+  [updateUserRole](file:///f:/boilerplate/api/src/modules/users/users.service.ts),
+  [deleteUser](file:///f:/boilerplate/api/src/modules/users/users.service.ts),
+  [revokeUserSessions](file:///f:/boilerplate/api/src/modules/users/users.service.ts), and
+  [resetUserTwoFactor](file:///f:/boilerplate/api/src/modules/users/users.service.ts).
 
-#### [MODIFY] [auth.controller.ts](file:///f:/boilerplate/api/src/app/auth/auth.controller.ts)
+#### [MODIFY] [auth.controller.ts](file:///f:/boilerplate/api/src/modules/auth/auth.controller.ts)
 
-- Inject [AuditLogService](file:///f:/boilerplate/api/src/app/audit-log/audit-log.service.ts).
+- Inject [AuditLogService](file:///f:/boilerplate/api/src/modules/audit-log/audit-log.service.ts).
 - Write log entries in
-  [disableTwoFactor](file:///f:/boilerplate/api/src/app/auth/auth.controller.ts) and
-  [verifyMagicLink](file:///f:/boilerplate/api/src/app/auth/auth.controller.ts) (login success).
+  [disableTwoFactor](file:///f:/boilerplate/api/src/modules/auth/auth.controller.ts) and
+  [verifyMagicLink](file:///f:/boilerplate/api/src/modules/auth/auth.controller.ts) (login success).
 
 ---
 
@@ -173,51 +173,52 @@ logging. Password authentication changes are explicitly excluded.
   - Invitation email template (`auth_invitation`): Sent when an admin creates a user account.
   - 2FA security alert template (`auth_two_factor_alert`): Sent when 2FA is enabled or disabled.
 
-#### [NEW] [welcome-email.service.ts](file:///f:/boilerplate/api/src/app/auth/services/welcome-email.service.ts)
+#### [NEW] [welcome-email.service.ts](file:///f:/boilerplate/api/src/modules/auth/services/welcome-email.service.ts)
 
 - Inject `EmailDispatcherService` to send using template `auth_welcome`.
 
-#### [NEW] [approval-email.service.ts](file:///f:/boilerplate/api/src/app/auth/services/approval-email.service.ts)
+#### [NEW] [approval-email.service.ts](file:///f:/boilerplate/api/src/modules/auth/services/approval-email.service.ts)
 
 - Inject `EmailDispatcherService` to send using template `auth_account_approval`.
 
-#### [NEW] [invitation-email.service.ts](file:///f:/boilerplate/api/src/app/auth/services/invitation-email.service.ts)
+#### [NEW] [invitation-email.service.ts](file:///f:/boilerplate/api/src/modules/auth/services/invitation-email.service.ts)
 
 - Inject `EmailDispatcherService` to send using template `auth_invitation`.
 
-#### [NEW] [two-factor-alert-email.service.ts](file:///f:/boilerplate/api/src/app/auth/services/two-factor-alert-email.service.ts)
+#### [NEW] [two-factor-alert-email.service.ts](file:///f:/boilerplate/api/src/modules/auth/services/two-factor-alert-email.service.ts)
 
 - Inject `EmailDispatcherService` to send using template `auth_two_factor_alert`.
 
-#### [MODIFY] [auth.module.ts](file:///f:/boilerplate/api/src/app/auth/auth.module.ts)
+#### [MODIFY] [auth.module.ts](file:///f:/boilerplate/api/src/modules/auth/auth.module.ts)
 
 - Register the new email services as providers.
 
-#### [MODIFY] [auth.service.ts](file:///f:/boilerplate/api/src/app/auth/core/auth.service.ts)
+#### [MODIFY] [auth.service.ts](file:///f:/boilerplate/api/src/modules/auth/core/auth.service.ts)
 
 - Inject
-  [WelcomeEmailService](file:///f:/boilerplate/api/src/app/auth/services/welcome-email.service.ts).
+  [WelcomeEmailService](file:///f:/boilerplate/api/src/modules/auth/services/welcome-email.service.ts).
 - Trigger welcome email during first-time user provisioning in
-  [findOrProvisionMagicLinkUser](file:///f:/boilerplate/api/src/app/auth/core/auth.service.ts) and
-  [findOrCreateGoogleUser](file:///f:/boilerplate/api/src/app/auth/core/auth.service.ts).
+  [findOrProvisionMagicLinkUser](file:///f:/boilerplate/api/src/modules/auth/core/auth.service.ts)
+  and [findOrCreateGoogleUser](file:///f:/boilerplate/api/src/modules/auth/core/auth.service.ts).
 
-#### [MODIFY] [users.service.ts](file:///f:/boilerplate/api/src/app/users/users.service.ts)
+#### [MODIFY] [users.service.ts](file:///f:/boilerplate/api/src/modules/users/users.service.ts)
 
 - Inject
-  [InvitationEmailService](file:///f:/boilerplate/api/src/app/auth/services/invitation-email.service.ts)
+  [InvitationEmailService](file:///f:/boilerplate/api/src/modules/auth/services/invitation-email.service.ts)
   and
-  [ApprovalEmailService](file:///f:/boilerplate/api/src/app/auth/services/approval-email.service.ts).
+  [ApprovalEmailService](file:///f:/boilerplate/api/src/modules/auth/services/approval-email.service.ts).
 - Trigger invitation email in
-  [createUser](file:///f:/boilerplate/api/src/app/users/users.service.ts).
-- Trigger approval email in [updateUser](file:///f:/boilerplate/api/src/app/users/users.service.ts)
-  if `isApproved` changes to `true`.
+  [createUser](file:///f:/boilerplate/api/src/modules/users/users.service.ts).
+- Trigger approval email in
+  [updateUser](file:///f:/boilerplate/api/src/modules/users/users.service.ts) if `isApproved`
+  changes to `true`.
 
-#### [MODIFY] [auth.controller.ts](file:///f:/boilerplate/api/src/app/auth/auth.controller.ts)
+#### [MODIFY] [auth.controller.ts](file:///f:/boilerplate/api/src/modules/auth/auth.controller.ts)
 
 - Inject
-  [TwoFactorAlertEmailService](file:///f:/boilerplate/api/src/app/auth/services/two-factor-alert-email.service.ts).
+  [TwoFactorAlertEmailService](file:///f:/boilerplate/api/src/modules/auth/services/two-factor-alert-email.service.ts).
 - Trigger alert email when disabling 2FA in
-  [disableTwoFactor](file:///f:/boilerplate/api/src/app/auth/auth.controller.ts).
+  [disableTwoFactor](file:///f:/boilerplate/api/src/modules/auth/auth.controller.ts).
 
 ---
 

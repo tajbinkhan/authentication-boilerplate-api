@@ -11,8 +11,8 @@ import {
 	varchar,
 } from 'drizzle-orm/pg-core';
 
+import type { TemplateVariableDescriptor } from '../../../modules/email-template/email-template.registry';
 import { timestamps } from '../helpers';
-import type { TemplateVariableDescriptor } from '../../../app/email-template/email-template.registry';
 
 export const emailTemplates = pgTable(
 	'email_templates',

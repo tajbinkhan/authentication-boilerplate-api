@@ -9,17 +9,21 @@
 	"trailingComma": "all",
 	"importOrder": [
 		"<THIRD_PARTY_MODULES>",
-		"^@/lib/(.*)$",
-		"^@/components/(.*)$",
-		"^@/app/(.*)$",
+		"^@/core/(.*)$",
+		"^@/common/(.*)$",
+		"^@/modules/(.*)$",
 		"^./(.*)$"
 	],
 	"importOrderSeparation": true,
 	"importOrderSortSpecifiers": true,
-	"plugins": ["@trivago/prettier-plugin-sort-imports"],
+	"plugins": [
+		"@trivago/prettier-plugin-sort-imports"
+	],
 	"overrides": [
 		{
-			"files": ["*.ts"],
+			"files": [
+				"*.ts"
+			],
 			"options": {
 				"parser": "babel-ts"
 			}

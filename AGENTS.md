@@ -9,13 +9,13 @@ database management via **Drizzle ORM**, and absolute domain isolation.
 
 ### 1. The File-Volume Directory Rule (Strict Flattener)
 
-You must continuously analyze file counts within feature modules (`src/app/[feature]/`) and follow
-consistent placement rules. To reduce later refactors and simplify decisions, adopt a static schema
-placement rule and a pragmatic folder rule for other layers:
+You must continuously analyze file counts within feature modules (`src/modules/[feature]/`) and
+follow consistent placement rules. To reduce later refactors and simplify decisions, adopt a static
+schema placement rule and a pragmatic folder rule for other layers:
 
 - **Schemas:** Always place Zod schemas in a `schemas/` directory under the feature (for example
-  `src/app/user/schemas/`). This static rule avoids multi-step lookahead and reduces cognitive load
-  when adding or moving schema files.
+  `src/modules/user/schemas/`). This static rule avoids multi-step lookahead and reduces cognitive
+  load when adding or moving schema files.
 - **Controllers/Services/Repositories:** Keep these files flat at the feature root when the layer
   has a single file. If a layer grows to require two or more related files, create a dedicated
   sub-folder (for example `controllers/`, `services/`, or `repositories/`).
@@ -48,7 +48,7 @@ placement rule and a pragmatic folder rule for other layers:
 ### 4. Code-First System Actions
 
 - Transactional emails must be built completely code-first inside a dedicated domain helper class
-  (`src/app/[feature]/emails/[feature].email.ts`).
+  (`src/modules/[feature]/emails/[feature].email.ts`).
 - The use of `.html`, `.hbs`, or `.ejs` files is entirely forbidden. All templates must be compiled
   in memory using typesafe TypeScript template literals.
 
@@ -76,7 +76,7 @@ placement rule and a pragmatic folder rule for other layers:
 ### 7. RBAC & Policy Layer
 
 - Role-based access control and ownership checks must live in dedicated policy files:
-  `src/app/[feature]/[feature].policy.ts`.
+  `src/modules/[feature]/[feature].policy.ts`.
 - Business rules and authorization logic must never be placed in controllers or repositories.
 - Controllers are strictly responsible for: route wiring, guards, input extraction, and delegating
   to services.
@@ -161,7 +161,7 @@ src/
 │   ├── logger/               # Custom enterprise logging providers
 │   ├── mail/                 # Global email infrastructure dispatcher wrapper
 │   └── cache/                # Key-value memory systems
-└── app/                      # Business Feature Workspace
+└── modules/                      # Business Feature Workspace
     ├── auth/                 # Multi-File Example: uses controllers/, services/, schemas/, policies/, etc.
     └── user/                 # Flat-File Example: files sit flat at root until the volume rule is tripped
 

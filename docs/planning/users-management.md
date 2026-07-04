@@ -8,7 +8,7 @@ sessions from the dashboard.
 
 ## Decisions
 
-- Implement the backend as `src/app/users` to match the project app-module convention.
+- Implement the backend as `src/modules/users` to match the project app-module convention.
 - Use the existing `users` and `sessions` tables; no schema migration is required.
 - Expose public UUIDs as `id` in API responses and keep internal numeric IDs server-side only.
 - Restrict the module with `JwtAuthGuard`, `RolesGuard`, and `@Roles('ADMIN')`.

@@ -27,7 +27,7 @@ integrations.
 - `users` — Admin user management and session controls (7 handlers).
 
 Summary: 4 public API modules and approximately 29 route handlers across the controllers under
-`src/app/`.
+`src/modules/`.
 
 ## Quick Start
 
@@ -86,7 +86,7 @@ when you add or modify endpoints.
 
 ## Contributing
 
-- Follow existing module boundaries in `src/app/*`.
+- Follow existing module boundaries in `src/modules/*`.
 - Add or update docs in `docs/api/` when changing public API contracts.
 
 ## Notes

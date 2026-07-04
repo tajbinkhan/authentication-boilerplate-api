@@ -1,7 +1,10 @@
 import { sql } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
-import { TEMPLATE_REGISTRY, type TemplateKey } from '../../../app/email-template/email-template.registry';
+import {
+	TEMPLATE_REGISTRY,
+	type TemplateKey,
+} from '../../../modules/email-template/email-template.registry';
 import schema from '../schema';
 
 type SeedDatabase = NodePgDatabase<typeof schema>;

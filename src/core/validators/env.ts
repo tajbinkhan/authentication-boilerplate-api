@@ -32,7 +32,6 @@ const integrationFlagsSchema = z.object({
 
 const integrationCredentialsSchema = z.object({
 	GOOGLE_CLIENT_ID: validateString('GOOGLE_CLIENT_ID').optional(),
-
 	CLOUDINARY_CLOUD_NAME: validateString('CLOUDINARY_CLOUD_NAME').optional(),
 	CLOUDINARY_API_KEY: validateString('CLOUDINARY_API_KEY').optional(),
 	CLOUDINARY_API_SECRET: validateString('CLOUDINARY_API_SECRET').optional(),
